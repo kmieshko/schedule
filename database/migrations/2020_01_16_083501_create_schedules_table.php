@@ -16,7 +16,6 @@ class CreateSchedulesTable extends Migration
         Schema::create('schedules', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('id_employee');
-            $table->tinyInteger('is_manager');
             $table->string('id_week');
             $table->tinyInteger('monday');
             $table->tinyInteger('tuesday');
@@ -25,7 +24,14 @@ class CreateSchedulesTable extends Migration
             $table->tinyInteger('friday');
             $table->tinyInteger('saturday');
             $table->tinyInteger('is_done');
-            $table->dateTime('date');
+            $table->timestamps();
+        });
+
+
+        Schema::create('weekends', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('day');
+            $table->tinyInteger('priority');
         });
     }
 
