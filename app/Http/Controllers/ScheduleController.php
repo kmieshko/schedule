@@ -14,13 +14,15 @@ class ScheduleController extends Controller
     public function index()
     {
 //        DB::enableQueryLog();
-
-        $schedules = Schedule::orderBy('id', 'desc')->first();
+        $objSchedule = new Schedule();
+        $schedules = $objSchedule->getLastSchedule();
         if (empty($schedules)) {
             $schedule = $this->createScheduleFirstTime();
         } else {
             $schedule = $this->createSchedule($schedules);
         }
+        $objSchedule->insertSchedule($schedule);
+
 
 
 //        $query = DB::getQueryLog();
@@ -29,7 +31,7 @@ class ScheduleController extends Controller
         echo '<pre>' . print_r($schedule, true) . '</pre>';
 //        echo '<pre>' . print_r($query, true) . '</pre>';
         die;
-        
+
     }
 
     protected function createScheduleFirstTime()
@@ -37,43 +39,45 @@ class ScheduleController extends Controller
         DB::enableQueryLog();
 
         $objEmployee = new Employee();
-        $count_managers = $objEmployee->getCountManagers();
+        $managers = $objEmployee->getManagers();
+        $workers = $objEmployee->getWorkers();
+        $count_managers = count($managers);
+        $count_workers = count($workers);
         $general_employees = $objEmployee->getGeneralEmployees();
         $weekends = $objEmployee->getWeekendsByPrioity();
 
+        // weekends: key = priority day; value = weekend data
+        foreach ($weekends as $key => $weekend) {
+            $weekends[$weekend->priority] = $weekend;
+        }
+        unset($weekends[0]);
+
+        // managers_priorities: id => [nb_week => priority_weekend_day]
         $managers_priorities = array();
-        $employees = array();
-        foreach ($general_employees as $employee) {
-            $employees[$employee->id] = (array)$employee;
-            if (!empty($employee->is_manager)) {
-                $managers_priorities[] = $employee->id;
+        for ($i = 0; $i < $count_managers; $i++) {
+            for ($j = 1; $j <= $count_managers; $j++) {
+                $managers_priorities[$managers[$i]->id][$j] = ($i + $j) % $count_managers + 1;
             }
         }
-        // key (who first in queue) => nb_manager
-        shuffle($managers_priorities);
-        foreach ($weekends as $weekend) {
-            if (!empty($managers_priorities)) {
-                $employee_id = array_shift($managers_priorities);
-                $employees[$employee_id]['weekend'] = $weekend->day;
+
+        // workers have the same priorities like managers
+        $data = array();
+        for ($w = 1; $w <= $count_managers; $w++) {
+            foreach ($general_employees as $employee) {
+                if (!empty($employee->is_manager)) {
+                    $id = $employee->id;
+                }
+                $week = 'W' . $w;
+                $team = 'T' . $employee->nb_team;
+                $weekend_day = $weekends[$managers_priorities[$id][$w]]->day;
+                $data[$week][$team][$employee->id] = (array)$employee;
+                $data[$week][$team][$employee->id]['weekend'] = $weekend_day;
             }
         }
-        
-        echo '<pre>' . print_r($employees, true) . '</pre>';
+        echo '<pre>' . print_r($data, true) . '</pre>';
         die;
         
-        $query = DB::getQueryLog();
-        $query = end($query);
-
-        $group_employees = array();
-        foreach ($employees as $employee) {
-            $group_employees[$employee->nb_team][$employee->id] = (array)$employee;
-        }
-
-        echo '<pre>' . print_r($group_employees, true) . '</pre>';
-        echo '<pre>' . print_r($general_employees, true) . '</pre>';
-        die;
-        
-
+        return $data;
     }
 
     protected function createSchedule($schedules)
