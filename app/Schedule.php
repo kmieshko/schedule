@@ -7,14 +7,13 @@ use Illuminate\Support\Facades\DB;
 
 class Schedule extends Model
 {
-    public function getLastSchedule($n = 3)
+    public function getLatestSchedule($n = 1)
     {
-        $schedule = DB::table('schedules')
-            ->limit($n)
-            ->orderBy('id', 'desc')
+        $latest_week = DB::table("schedules")
+            ->where('id_week', '=', DB::raw("(SELECT MAX(schedules.id_week) FROM schedules)"))
             ->get()
             ->toArray();
-        return $schedule;
+        return $latest_week;
     }
 
     public function insertSchedule($schedules)

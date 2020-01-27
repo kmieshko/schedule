@@ -52,12 +52,13 @@ class Employee extends Model
         return $weekends;
     }
 
-    public function insertWeekend($id_employee, $nb_team, $id_week, $day)
+    public function insertWeekend($id_employee, $nb_team, $id_department, $id_week, $day)
 	{
 		$data = array(
 			'id_week' => $id_week,
 			'id_employee' => $id_employee,
 			'nb_team' => $nb_team,
+			'id_department' => $id_department,
 			'monday' => $day == 'monday' ? 1 : 0,
 			'tuesday' => $day == 'tuesday' ? 1 : 0,
 			'wednesday' => $day == 'wednesday' ? 1 : 0,
@@ -73,7 +74,7 @@ class Employee extends Model
 	public function checkWeekend($id_employee, $id_week)
 	{
 		$schedule = DB::table('schedules')->where([
-			['id_employee', '=', $id_employee], 
+			['id_employee', '=', $id_employee],
 			['id_week', '=', $id_week],
 			])->get()
 			->toArray();
