@@ -7,49 +7,58 @@ use Illuminate\Support\Facades\DB;
 
 class Employee extends Model
 {
-    public function getManagers()
+    public function getGeneralManagers()
     {
-        $managers = DB::table('employees')
+        $data = DB::table('employees')
             ->where('is_manager', '=', 1)
             ->get()
             ->toArray();
-        return $managers;
+        return $data;
     }
 
-    public function getWorkers()
+    public function getGeneralWorkers()
     {
-        $workers = DB::table('employees')
+        $data = DB::table('employees')
             ->where('is_manager', '=', 0)
             ->get()
             ->toArray();
-        return $workers;
+        return $data;
     }
 
     public function getGeneralEmployees()
     {
-        $general_employees = DB::table('employees')
+        $data = DB::table('employees')
             ->where('id_department', '=', 1)
             ->get()
             ->toArray();
-        return $general_employees;
+        return $data;
+    }
+
+    public function getNotGeneralEmployees()
+    {
+        $data = DB::table('employees')
+            ->where('id_department', '!=', 1)
+            ->get()
+            ->toArray();
+        return $data;
     }
 
     public function getWeekendsByPriority()
     {
-        $weekends = DB::table('weekends')
+        $data = DB::table('weekends')
             ->orderBy('priority', 'asc')
             ->get()
             ->toArray();
-        return $weekends;
+        return $data;
     }
 
     public function getWeekends()
     {
-        $weekends = DB::table('weekends')
+        $data = DB::table('weekends')
             ->orderBy('id', 'asc')
             ->get()
             ->toArray();
-        return $weekends;
+        return $data;
     }
 
     public function insertWeekend($id_employee, $nb_team, $id_department, $id_week, $day)
@@ -73,35 +82,47 @@ class Employee extends Model
 
 	public function checkWeekend($id_employee, $id_week)
 	{
-		$schedule = DB::table('schedules')->where([
+        $data = DB::table('schedules')->where([
 			['id_employee', '=', $id_employee],
 			['id_week', '=', $id_week],
 			])->get()
 			->toArray();
-		return $schedule;
+		return $data;
 	}
 
-	public function checkWeekendByDay($nb_week, $day)
+	public function checkWeekendByDayForGeneral($nb_week, $day)
 	{
-		$schedule = DB::table('schedules')->where([
+        $data = DB::table('schedules')->where([
 			['id_week', '=', $nb_week],
+            ['id_department', '=', 1],
 			[$day, '=', 1],
 			])->get()
 			->toArray();
-		return $schedule;
+		return $data;
 	}
+
+    public function checkWeekendByDayForNotGeneral($nb_week, $day)
+    {
+        $data = DB::table('schedules')->where([
+            ['id_week', '=', $nb_week],
+            ['id_department', '!=', 1],
+            [$day, '=', 1],
+        ])->get()
+            ->toArray();
+        return $data;
+    }
 
 	public function checkWeekendByTeam($nb_week, $nb_team)
 	{
-		$schedule = DB::table('schedules')->where([
+        $data = DB::table('schedules')->where([
 			['id_week', '=', $nb_week],
 			['nb_team', '=', $nb_team],
 			])
 			->get()
 			->toArray();
-		if (!empty($schedule)) {
-			$schedule = $schedule[0];
+		if (!empty($data)) {
+            $data = $data[0];
 		}
-		return $schedule;
+		return $data;
 	}
 }

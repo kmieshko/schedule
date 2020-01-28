@@ -2,12 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="581712f3-42c8-467c-a972-2e00a09eb9c8" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/blog.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/blog.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/Employee.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Employee.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/Http/Controllers/ScheduleController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/ScheduleController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Schedule.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Schedule.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2020_01_16_083501_create_schedules_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2020_01_16_083501_create_schedules_table.php" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -181,7 +178,8 @@
       <workItem from="1580050458544" duration="24603000" />
       <workItem from="1580147573298" duration="2112000" />
       <workItem from="1580149924981" duration="167000" />
-      <workItem from="1580153570492" duration="4690000" />
+      <workItem from="1580153570492" duration="4780000" />
+      <workItem from="1580238218668" duration="4382000" />
     </task>
     <servers />
   </component>
