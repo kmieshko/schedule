@@ -34,7 +34,7 @@ class Employee extends Model
         return $data;
     }
 
-    public function getNotGeneralEmployees()
+    public function getNonGeneralEmployees()
     {
         $data = DB::table('employees')
             ->where('id_department', '!=', 1)

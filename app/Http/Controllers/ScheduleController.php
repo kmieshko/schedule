@@ -32,8 +32,9 @@ class ScheduleController extends Controller
 		$data['user_permission'] = '';
 
 		$objSchedule = new Schedule();
-		$schedules = $objSchedule->getAllSchedules();
-		dd($schedules);
+		$this->createScheduleFirstTime();
+//		$schedules = $objSchedule->getAllSchedules();
+//		dd($schedules);
 
 		return view('combined')->with($data);
 
@@ -71,7 +72,7 @@ class ScheduleController extends Controller
         return $result;
     }
 
-    public function sortNotGeneralEmployees($employees)
+    public function sortNonGeneralEmployees($employees)
     {
         $result = array();
         foreach ($employees as $employee) {
@@ -80,7 +81,7 @@ class ScheduleController extends Controller
         return $result;
     }
 
-    public function createScheduleForGeneralEmployees($general_employees, $nb_week, &$weekends)
+    public function createScheduleForGeneralEmployees($general_employees, $nb_week, $week_dates, &$weekends)
     {
 		$objSchedule = new Schedule();
         foreach ($general_employees as $teams) {
@@ -95,20 +96,52 @@ class ScheduleController extends Controller
                         $before_last_saturday = $objSchedule->checkWeekendByTeam($nb_week - 2, $employee['nb_team']);
                         if ((empty($last_saturday) || !$last_saturday->saturday) &&
                             (empty($before_last_saturday) || !$before_last_saturday->saturday)) { // if team hadn't Saturday in latest 2 weeks - weekend is Saturday
-                            $objSchedule->insertWeekend($employee['id'], $employee['nb_team'], $employee['id_department'], $nb_week, 'saturday');
+							$insert_data = array(
+								'id_week' => $nb_week,
+								'id_employee' => $employee['id'],
+								'nb_team' => $employee['nb_team'],
+								'day' => 'saturday',
+								'week_start' => $week_dates['week_start'],
+								'week_end' => $week_dates['week_end'],
+							);
+							$objSchedule->insertWeekend($insert_data);
                             $data['W' . $nb_week]['saturday'][$employee['id']] = $employee;
                         } else { // if team had Saturday in latest 2 weeks - weekend current weekend day
-                            $objSchedule->insertWeekend($employee['id'], $employee['nb_team'], $employee['id_department'], $nb_week, $day);
+							$insert_data = array(
+								'id_week' => $nb_week,
+								'id_employee' => $employee['id'],
+								'nb_team' => $employee['nb_team'],
+								'day' => $day,
+								'week_start' => $week_dates['week_start'],
+								'week_end' => $week_dates['week_end'],
+							);
+							$objSchedule->insertWeekend($insert_data);
                             $data['W' . $nb_week][$day][$employee['id']] = $employee;
                             $day == 'friday' ? reset($weekends) : next($weekends);
                         }
                     } else { // if Saturday isn't available
                         $teammate = $objSchedule->checkWeekendByTeam($nb_week, $employee['nb_team']);
                         if (!empty($teammate) && $teammate->saturday == 1 && $teammate->id_employee != $employee['id']) { // if teammate has Saturday weekend - Saturday is weekend for whole team
-                            $objSchedule->insertWeekend($employee['id'], $employee['nb_team'], $employee['id_department'], $nb_week, 'saturday');
+							$insert_data = array(
+								'id_week' => $nb_week,
+								'id_employee' => $employee['id'],
+								'nb_team' => $employee['nb_team'],
+								'day' => 'saturday',
+								'week_start' => $week_dates['week_start'],
+								'week_end' => $week_dates['week_end'],
+							);
+							$objSchedule->insertWeekend($insert_data);
                             $data['W' . $nb_week]['saturday'][$employee['id']] = $employee;
                         } else {
-                            $objSchedule->insertWeekend($employee['id'], $employee['nb_team'], $employee['id_department'], $nb_week, $day);
+							$insert_data = array(
+								'id_week' => $nb_week,
+								'id_employee' => $employee['id'],
+								'nb_team' => $employee['nb_team'],
+								'day' => $day,
+								'week_start' => $week_dates['week_start'],
+								'week_end' => $week_dates['week_end'],
+							);
+                        	$objSchedule->insertWeekend($insert_data);
                             $data['W' . $nb_week][$day][$employee['id']] = $employee;
                             $day == 'friday' ? reset($weekends) : next($weekends);
                         }
@@ -118,7 +151,7 @@ class ScheduleController extends Controller
         }
     }
 
-    public function createScheduleForNotGeneralEmployees($general_employees, $nb_week, &$weekends)
+    public function createScheduleForNonGeneralEmployees($general_employees, $nb_week, $week_dates, &$weekends)
     {
 		$objSchedule = new Schedule();
         foreach ($general_employees as $teams) {
@@ -126,27 +159,59 @@ class ScheduleController extends Controller
                 $day = current($weekends);
                 $check_weekend = $objSchedule->checkWeekend($employee['id'], $nb_week); // есть ли выхоной
                 if (empty($check_weekend)) {
-                    $check_saturday = $objSchedule->checkWeekendByDayForNotGeneral($nb_week, 'saturday');
+                    $check_saturday = $objSchedule->checkWeekendByDayForNonGeneral($nb_week, 'saturday');
                     if (!$check_saturday) { // if current Saturday is available
                         // check latest 2 team weeks
                         $last_saturday = $objSchedule->checkWeekendByTeam($nb_week - 1, $employee['nb_team']);
                         $before_last_saturday = $objSchedule->checkWeekendByTeam($nb_week - 2, $employee['nb_team']);
                         if ((empty($last_saturday) || !$last_saturday->saturday) &&
                             (empty($before_last_saturday) || !$before_last_saturday->saturday)) { // if team hadn't Saturday in latest 2 weeks - weekend is Saturday
-							$objSchedule->insertWeekend($employee['id'], $employee['nb_team'], $employee['id_department'], $nb_week, 'saturday');
+							$insert_data = array(
+								'id_week' => $nb_week,
+								'id_employee' => $employee['id'],
+								'nb_team' => $employee['nb_team'],
+								'day' => 'saturday',
+								'week_start' => $week_dates['week_start'],
+								'week_end' => $week_dates['week_end'],
+							);
+							$objSchedule->insertWeekend($insert_data);
                             $data['W' . $nb_week]['saturday'][$employee['id']] = $employee;
                         } else { // if team had Saturday in latest 2 weeks - weekend current weekend day
-							$objSchedule->insertWeekend($employee['id'], $employee['nb_team'], $employee['id_department'], $nb_week, $day);
-                            $data['W' . $nb_week][$day][$employee['id']] = $employee;
+							$insert_data = array(
+								'id_week' => $nb_week,
+								'id_employee' => $employee['id'],
+								'nb_team' => $employee['nb_team'],
+								'day' => $day,
+								'week_start' => $week_dates['week_start'],
+								'week_end' => $week_dates['week_end'],
+							);
+							$objSchedule->insertWeekend($insert_data);
+							$data['W' . $nb_week][$day][$employee['id']] = $employee;
                             $day == 'friday' ? reset($weekends) : next($weekends);
                         }
                     } else { // if Saturday isn't available
                         $teammate = $objSchedule->checkWeekendByTeam($nb_week, $employee['nb_team']);
                         if (!empty($teammate) && $teammate->saturday == 1 && $teammate->id_employee != $employee['id']) { // if teammate has Saturday weekend - Saturday is weekend for whole team
-							$objSchedule->insertWeekend($employee['id'], $employee['nb_team'], $employee['id_department'], $nb_week, 'saturday');
+							$insert_data = array(
+								'id_week' => $nb_week,
+								'id_employee' => $employee['id'],
+								'nb_team' => $employee['nb_team'],
+								'day' => 'saturday',
+								'week_start' => $week_dates['week_start'],
+								'week_end' => $week_dates['week_end'],
+							);
+							$objSchedule->insertWeekend($insert_data);
                             $data['W' . $nb_week]['saturday'][$employee['id']] = $employee;
                         } else {
-							$objSchedule->insertWeekend($employee['id'], $employee['nb_team'], $employee['id_department'], $nb_week, $day);
+							$insert_data = array(
+								'id_week' => $nb_week,
+								'id_employee' => $employee['id'],
+								'nb_team' => $employee['nb_team'],
+								'day' => $day,
+								'week_start' => $week_dates['week_start'],
+								'week_end' => $week_dates['week_end'],
+							);
+                        	$objSchedule->insertWeekend($insert_data);
                             $data['W' . $nb_week][$day][$employee['id']] = $employee;
                             $day == 'friday' ? reset($weekends) : next($weekends);
                         }
@@ -177,13 +242,18 @@ class ScheduleController extends Controller
 		return $week_nb;
 	}
 
-	public function createScheduleFirstTime($date = null, $week_amount = 9)
+	public function createScheduleFirstTime($date = array(), $week_amount = 9)
 	{
+		if (empty($date)) {
+			$date['start'] = date('Y-m-d', strtotime('next Monday'));
+			$date['end'] = date('Y-m-d', strtotime('next Sunday'));
+			$date['year'] = date('Y');
+		}
 		$objEmployee = new Employee();
 		$objSchedule = new Schedule();
 		$general_managers = $objEmployee->getGeneralManagers();
 		$general_workers = $objEmployee->getGeneralWorkers();
-        $other_employees = $objEmployee->getNotGeneralEmployees();
+		$other_employees = $objEmployee->getNonGeneralEmployees();
 		$tmp_weekends = $objSchedule->getWeekends();
 
 		// only days
@@ -196,18 +266,15 @@ class ScheduleController extends Controller
 		$weekends1 = $weekends;
 		$weekends2 = $weekends;
 		$general_employees = $this->sortGeneralEmployees($general_managers, $general_workers);
-        $other_employees = $this->sortNotGeneralEmployees($other_employees);
-		foreach (range(1, 19, 1) as $nb_week) {
-			$general_department = $this->createScheduleForGeneralEmployees($general_employees, $nb_week, $weekends1);
-			$other_departments = $this->createScheduleForNotGeneralEmployees($other_employees, $nb_week, $weekends2);
+        $other_employees = $this->sortNonGeneralEmployees($other_employees);
+		$week_in_year = $this->getWeekNumber($date['start']);
+		foreach (range(1, $week_amount, 1) as $week) {
+			$nb_week = $week + $week_in_year;
+			$week_dates = $this->getStartAndEndDate($nb_week, $date['year']);
+			$general_department = $this->createScheduleForGeneralEmployees($general_employees, $nb_week, $week_dates, $weekends1);
+			$other_departments = $this->createScheduleForNonGeneralEmployees($other_employees, $nb_week, $week_dates, $weekends2);
 			$data = $this->mergeSchedule($general_department, $other_departments);
 		}
 		return $data;
 	}
-
-	public function continueSchedule($schedules)
-    {
-        $data = array();
-        return $data;
-    }
 }

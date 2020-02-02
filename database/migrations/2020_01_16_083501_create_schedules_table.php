@@ -25,7 +25,8 @@ class CreateSchedulesTable extends Migration
             $table->tinyInteger('thursday');
             $table->tinyInteger('friday');
             $table->tinyInteger('saturday');
-            $table->tinyInteger('is_done');
+            $table->date('week_start');
+            $table->date('week_end');
             $table->timestamps();
         });
 

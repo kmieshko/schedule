@@ -34,21 +34,20 @@ class Schedule extends Model
 		return $data;
 	}
 
-	public function insertWeekend($id_employee, $nb_team, $id_department, $id_week, $day)
+	public function insertWeekend($data)
 	{
 		$data = array(
-			'id_week' => $id_week,
-			'id_employee' => $id_employee,
-			'nb_team' => $nb_team,
-			'id_department' => $id_department,
-			'monday' => $day == 'monday' ? 1 : 0,
-			'tuesday' => $day == 'tuesday' ? 1 : 0,
-			'wednesday' => $day == 'wednesday' ? 1 : 0,
-			'thursday' => $day == 'thursday' ? 1 : 0,
-			'friday' => $day == 'friday' ? 1 : 0,
-			'saturday' => $day == 'saturday' ? 1 : 0,
-			'is_done' => 1,
-
+			'id_week' => $data['id_week'],
+			'id_employee' => $data['id_employee'],
+			'nb_team' => $data['nb_team'],
+			'monday' => $data['day'] == 'monday' ? 1 : 0,
+			'tuesday' => $data['day'] == 'tuesday' ? 1 : 0,
+			'wednesday' => $data['day'] == 'wednesday' ? 1 : 0,
+			'thursday' => $data['day'] == 'thursday' ? 1 : 0,
+			'friday' => $data['day'] == 'friday' ? 1 : 0,
+			'saturday' => $data['day'] == 'saturday' ? 1 : 0,
+			'week_start' => $data['week_start'],
+			'week_end' => $data['week_end'],
 		);
 		DB::table('schedules')->insert($data);
 	}
@@ -74,7 +73,7 @@ class Schedule extends Model
 		return $data;
 	}
 
-	public function checkWeekendByDayForNotGeneral($nb_week, $day)
+	public function checkWeekendByDayForNonGeneral($nb_week, $day)
 	{
 		$data = DB::table('schedules')->where([
 			['id_week', '=', $nb_week],
