@@ -15,4 +15,4 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::resources(['/schedule' => 'ScheduleController']);
+Route::resources(['/schedules' => 'ScheduleController']);
