@@ -40,6 +40,7 @@ class Schedule extends Model
 			'id_week' => $data['id_week'],
 			'id_employee' => $data['id_employee'],
 			'nb_team' => $data['nb_team'],
+			'id_department' => $data['id_department'],
 			'monday' => $data['day'] == 'monday' ? 1 : 0,
 			'tuesday' => $data['day'] == 'tuesday' ? 1 : 0,
 			'wednesday' => $data['day'] == 'wednesday' ? 1 : 0,

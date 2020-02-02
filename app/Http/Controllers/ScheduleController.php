@@ -9,6 +9,7 @@ use App\Schedule;
 use App\Employee;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\Debug\Debug;
+use DateTime;
 
 class ScheduleController extends Controller
 {
@@ -28,11 +29,11 @@ class ScheduleController extends Controller
 	public function index()
 	{
 		$data = $this->data;
-		$data['view'] .= __METHOD__;
+		$data['view'] = 'schedules.index';
 		$data['user_permission'] = '';
 
 		$objSchedule = new Schedule();
-		$this->createScheduleFirstTime();
+//		$this->createScheduleFirstTime();
 //		$schedules = $objSchedule->getAllSchedules();
 //		dd($schedules);
 
@@ -100,6 +101,7 @@ class ScheduleController extends Controller
 								'id_week' => $nb_week,
 								'id_employee' => $employee['id'],
 								'nb_team' => $employee['nb_team'],
+								'id_department' => $employee['id_department'],
 								'day' => 'saturday',
 								'week_start' => $week_dates['week_start'],
 								'week_end' => $week_dates['week_end'],
@@ -111,6 +113,7 @@ class ScheduleController extends Controller
 								'id_week' => $nb_week,
 								'id_employee' => $employee['id'],
 								'nb_team' => $employee['nb_team'],
+								'id_department' => $employee['id_department'],
 								'day' => $day,
 								'week_start' => $week_dates['week_start'],
 								'week_end' => $week_dates['week_end'],
@@ -126,6 +129,7 @@ class ScheduleController extends Controller
 								'id_week' => $nb_week,
 								'id_employee' => $employee['id'],
 								'nb_team' => $employee['nb_team'],
+								'id_department' => $employee['id_department'],
 								'day' => 'saturday',
 								'week_start' => $week_dates['week_start'],
 								'week_end' => $week_dates['week_end'],
@@ -137,6 +141,7 @@ class ScheduleController extends Controller
 								'id_week' => $nb_week,
 								'id_employee' => $employee['id'],
 								'nb_team' => $employee['nb_team'],
+								'id_department' => $employee['id_department'],
 								'day' => $day,
 								'week_start' => $week_dates['week_start'],
 								'week_end' => $week_dates['week_end'],
@@ -170,6 +175,7 @@ class ScheduleController extends Controller
 								'id_week' => $nb_week,
 								'id_employee' => $employee['id'],
 								'nb_team' => $employee['nb_team'],
+								'id_department' => $employee['id_department'],
 								'day' => 'saturday',
 								'week_start' => $week_dates['week_start'],
 								'week_end' => $week_dates['week_end'],
@@ -181,6 +187,7 @@ class ScheduleController extends Controller
 								'id_week' => $nb_week,
 								'id_employee' => $employee['id'],
 								'nb_team' => $employee['nb_team'],
+								'id_department' => $employee['id_department'],
 								'day' => $day,
 								'week_start' => $week_dates['week_start'],
 								'week_end' => $week_dates['week_end'],
@@ -196,6 +203,7 @@ class ScheduleController extends Controller
 								'id_week' => $nb_week,
 								'id_employee' => $employee['id'],
 								'nb_team' => $employee['nb_team'],
+								'id_department' => $employee['id_department'],
 								'day' => 'saturday',
 								'week_start' => $week_dates['week_start'],
 								'week_end' => $week_dates['week_end'],
@@ -207,6 +215,7 @@ class ScheduleController extends Controller
 								'id_week' => $nb_week,
 								'id_employee' => $employee['id'],
 								'nb_team' => $employee['nb_team'],
+								'id_department' => $employee['id_department'],
 								'day' => $day,
 								'week_start' => $week_dates['week_start'],
 								'week_end' => $week_dates['week_end'],
