@@ -32,8 +32,6 @@ class ScheduleController extends Controller
 		$data['user_permission'] = '';
 
 		$objSchedule = new Schedule();
-//		$this->createScheduleFirstTime();
-//		die;
 		$schedules = $objSchedule->getAllSchedules();
 		$data['schedules'] = $this->sortSchedules($schedules);
 
@@ -58,6 +56,21 @@ class ScheduleController extends Controller
 		$data['current_week_dates'] =  $this->getStartAndEndDate($data['current_week'], date('Y'));
 		return view('combined')->with($data);
 	}
+
+	public function create()
+    {
+        $data = $this->data;
+        $data['view'] = 'schedules.create';
+        $data['user_permission'] = '';
+        $objEmployee = new Employee();
+        $employees = $objEmployee->getAllEmployeesWithDepartments();
+        $data['employees'] = $employees;
+        $data['latest_week'] = Schedule::max('id_week');
+        $dates = Schedule::select('week_start, week_end')->where('id_week', '=', $data['latest_week']); ///////// incorrect
+        dd($dates);
+//        $data['latest_dates'] = $dates->week_start . ' - ' . $dates->week_end;
+        return view('combined')->with($data);
+    }
 
 	public function sortSchedules($schedules)
 	{

@@ -15,6 +15,18 @@ class Employee extends Model
 		return $data;
 	}
 
+	public function getAllEmployeesWithDepartments()
+    {
+        $data = DB::table('employees')
+            ->join('departments', 'employees.id_department', '=', 'departments.id')
+            ->select('employees.*', 'departments.name as department_name')
+            ->orderBy('employees.nb_team', 'asc')
+            ->orderBy('employees.id', 'asc')
+            ->get()
+            ->toArray();
+        return $data;
+    }
+
     public function getGeneralManagers()
     {
         $data = DB::table('employees')
