@@ -13,7 +13,7 @@
 
         <li class="treeview" id="mainScheduleNav">
           <a href="#">
-            <i class="fa fa-schedules"></i>
+            <i class="fa fa-calendar"></i>
             <span>Schedules</span>
             <span class="pull-right-container">
                 <i class="fa fa-angle-left pull-right"></i>
@@ -175,7 +175,7 @@
 
         <?php endif; ?>
         <!-- user permission info -->
-        <li><a href="<?php echo url('auth/logout') ?>"><i class="fa fa-log-out"></i> <span>Logout</span></a></li>
+        <li><a href="<?php echo url('auth/logout') ?>"><i class="fa fa-sign-out"></i> <span>Logout</span></a></li>
 
       </ul>
     </section>

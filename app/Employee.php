@@ -7,6 +7,14 @@ use Illuminate\Support\Facades\DB;
 
 class Employee extends Model
 {
+	public function getAllEmployees()
+	{
+		$data = DB::table('employees')
+			->get()
+			->toArray();
+		return $data;
+	}
+
     public function getGeneralManagers()
     {
         $data = DB::table('employees')

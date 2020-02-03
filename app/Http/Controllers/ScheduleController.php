@@ -23,7 +23,6 @@ class ScheduleController extends Controller
 //		$this->not_logged_in();
 
 		$this->data['page_title'] = 'Schedules';
-		$this->data['view'] = 'schedules.';
 	}
 
 	public function index()
@@ -34,9 +33,28 @@ class ScheduleController extends Controller
 
 		$objSchedule = new Schedule();
 //		$this->createScheduleFirstTime();
-//		$schedules = $objSchedule->getAllSchedules();
-//		dd($schedules);
+		$schedules = $objSchedule->getAllSchedules();
+		$data['schedules'] = $this->sortSchedules($schedules);
 
+		// nb_week => [week_start, week_end]
+		$tmp_weeks = array_keys($data['schedules']);
+		$weeks = array();
+		foreach ($tmp_weeks as $week) {
+			$weeks[$week] = $this->getStartAndEndDate($week, date('Y'));
+		}
+
+		// only days
+		$tmp_weekends = $objSchedule->getWeekends();
+		$weekends = array();
+		foreach ($tmp_weekends as $weekend) {
+			$weekends[] = strtolower($weekend->day);
+		}
+		$weekends[] = 'sunday';
+
+		$data['weeks'] = $weeks;
+		$data['weekends'] = $weekends;
+		$data['current_week'] = $this->getWeekNumber(date('Y-m-d'));
+		$data['current_week_dates'] =  $this->getStartAndEndDate($data['current_week'], date('Y'));
 		return view('combined')->with($data);
 
 //	  DB::enableQueryLog();
@@ -57,6 +75,39 @@ class ScheduleController extends Controller
 //		echo '<pre>' . print_r($schedule, true) . '</pre>';
 //	  echo '<pre>' . print_r($query, true) . '</pre>';
 //		die;
+	}
+
+	public function sortSchedules($schedules)
+	{
+		$data = array();
+		$objSchedule = new Schedule();
+		$objEmployee = new Employee();
+		$tmp_employees = $objEmployee->getAllEmployees();
+		$tmp_week_days = $objSchedule->getWeekends();
+
+		// only days
+		$week_days = array();
+		foreach ($tmp_week_days as $week_day) {
+			$week_days[] = strtolower($week_day->day);
+		}
+
+		// id_employee => employee info
+		$employees = array();
+		foreach ($tmp_employees as $employee) {
+			$employees[$employee->id] = (array)$employee;
+		}
+
+		// [#WEEK] => [id_employee => (employee info + weekend info)]
+		foreach ($schedules as $schedule) {
+			$data[$schedule->id_week][$schedule->id_employee]['id_employee'] = $schedule->id_employee;
+			$data[$schedule->id_week][$schedule->id_employee]['first_name'] = $employees[$schedule->id_employee]['first_name'];
+			$data[$schedule->id_week][$schedule->id_employee]['last_name'] = $employees[$schedule->id_employee]['last_name'];
+			foreach ($week_days as $week_day) {
+				$data[$schedule->id_week][$schedule->id_employee][$week_day] = $schedule->$week_day;
+			}
+			$data[$schedule->id_week][$schedule->id_employee]['sunday'] = 1;
+		}
+		return $data;
 	}
 
     public function sortGeneralEmployees($managers, $workers)

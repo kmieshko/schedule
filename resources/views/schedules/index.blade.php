@@ -18,7 +18,9 @@
 			<div class="row">
 				<div class="col-md-12 col-xs-12">
 
-					<div id="messages">Current W <?= 'nb_week (01/01/2020 - 02-02-2020)'; ?></div>
+					<div id="messages">
+						Current W{{$current_week}} {{($current_week_dates['week_start'] . ' - ' . $current_week_dates['week_end'])}}
+					</div>
 
 
 					<div class="box">
@@ -27,14 +29,45 @@
 						</div>
 						<!-- /.box-header -->
 						<div class="box-body">
-							<table id="manageTable" class="table table-bordered table-striped">
-								<thead>
-								<tr>
+							{{--<table id="manageTable" class="table table-bordered table-striped">--}}
+								{{--<thead>--}}
+								{{--<tr>--}}
 
-								</tr>
-								</thead>
+								{{--</tr>--}}
+								{{--</thead>--}}
 
-							</table>
+							{{--</table>--}}
+							@foreach($schedules as $nb_week => $employees)
+								<table id="W{{$nb_week}}" class="table table-bordered">
+									<tr>
+										<td colspan="8">
+											{{'WEEK' . $nb_week . ' '}}
+										</td>
+									</tr>
+									<tr>
+										<td></td>
+										<td>Monday</td>
+										<td>Tuesday</td>
+										<td>Wednesday</td>
+										<td>Thursday</td>
+										<td>Friday</td>
+										<td>Saturday</td>
+										<td>Sunday</td>
+									</tr>
+									@foreach($employees as $id_employee => $employee)
+										<tr id="{{$employee['id_employee']}}">
+											<td>{{$employee['last_name'] . ' ' . $employee['first_name']}}</td>
+											@foreach($weekends as $weekend)
+												<td>
+													{{$employee[$weekend]}}
+												</td>
+											@endforeach
+										</tr>
+									@endforeach
+									<tr><td colspan="8"></td></tr>
+								</table>
+							@endforeach
+
 						</div>
 						<!-- /.box-body -->
 					</div>

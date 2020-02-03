@@ -7,13 +7,21 @@ use Illuminate\Support\Facades\DB;
 
 class Schedule extends Model
 {
-    public function getLatestSchedule($n = 1)
+	public function getAllSchedules()
+	{
+		$data = DB::table("schedules")
+			->get()
+			->toArray();
+		return	$data;
+	}
+
+    public function getLatestSchedule()
     {
-        $latest_week = DB::table("schedules")
+		$data = DB::table("schedules")
             ->where('id_week', '=', DB::raw("(SELECT MAX(schedules.id_week) FROM schedules)"))
             ->get()
             ->toArray();
-        return $latest_week;
+        return $data;
     }
 
 	public function getWeekendsByPriority()
