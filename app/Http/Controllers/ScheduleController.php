@@ -57,25 +57,6 @@ class ScheduleController extends Controller
 		$data['current_week'] = $this->getWeekNumber(date('m/d/Y'));
 		$data['current_week_dates'] =  $this->getStartAndEndDate($data['current_week'], date('Y'));
 		return view('combined')->with($data);
-
-//	  DB::enableQueryLog();
-//		$schedules = $objSchedule->getLastSchedule();
-//		if (empty($schedules)) {
-//		  $schedule = $this->createScheduleFirstTime();
-//			$schedule = $this->createScheduleFirstTime2();
-//		} else {
-//			$schedule = $this->createSchedule($schedules);
-//		}
-//		$objSchedule->insertSchedule($schedule);
-
-
-
-//	  $query = DB::getQueryLog();
-//	  $query = end($query);
-
-//		echo '<pre>' . print_r($schedule, true) . '</pre>';
-//	  echo '<pre>' . print_r($query, true) . '</pre>';
-//		die;
 	}
 
 	public function sortSchedules($schedules)
@@ -100,13 +81,15 @@ class ScheduleController extends Controller
 
 		// [#WEEK] => [id_employee => (employee info + weekend info)]
 		foreach ($schedules as $schedule) {
-			$data[$schedule->id_week][$schedule->id_employee]['id_employee'] = $schedule->id_employee;
-			$data[$schedule->id_week][$schedule->id_employee]['first_name'] = $employees[$schedule->id_employee]['first_name'];
-			$data[$schedule->id_week][$schedule->id_employee]['last_name'] = $employees[$schedule->id_employee]['last_name'];
-			foreach ($week_days as $week_day) {
-				$data[$schedule->id_week][$schedule->id_employee][$week_day] = $schedule->$week_day;
-			}
-			$data[$schedule->id_week][$schedule->id_employee]['sunday'] = 1;
+		    if (isset($employees[$schedule->id_employee])) {
+                $data[$schedule->id_week][$schedule->id_employee]['id_employee'] = $schedule->id_employee;
+                $data[$schedule->id_week][$schedule->id_employee]['first_name'] = $employees[$schedule->id_employee]['first_name'];
+                $data[$schedule->id_week][$schedule->id_employee]['last_name'] = $employees[$schedule->id_employee]['last_name'];
+                foreach ($week_days as $week_day) {
+                    $data[$schedule->id_week][$schedule->id_employee][$week_day] = $schedule->$week_day;
+                }
+                $data[$schedule->id_week][$schedule->id_employee]['sunday'] = 1;
+            }
 		}
 		return $data;
 	}
