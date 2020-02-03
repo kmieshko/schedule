@@ -33,6 +33,7 @@ class ScheduleController extends Controller
 
 		$objSchedule = new Schedule();
 //		$this->createScheduleFirstTime();
+//		die;
 		$schedules = $objSchedule->getAllSchedules();
 		$data['schedules'] = $this->sortSchedules($schedules);
 
@@ -53,7 +54,7 @@ class ScheduleController extends Controller
 
 		$data['weeks'] = $weeks;
 		$data['weekends'] = $weekends;
-		$data['current_week'] = $this->getWeekNumber(date('Y-m-d'));
+		$data['current_week'] = $this->getWeekNumber(date('m/d/Y'));
 		$data['current_week_dates'] =  $this->getStartAndEndDate($data['current_week'], date('Y'));
 		return view('combined')->with($data);
 
@@ -305,8 +306,8 @@ class ScheduleController extends Controller
 	public function createScheduleFirstTime($date = array(), $week_amount = 9)
 	{
 		if (empty($date)) {
-			$date['start'] = date('Y-m-d', strtotime('next Monday'));
-			$date['end'] = date('Y-m-d', strtotime('next Sunday'));
+			$date['start'] = date('Y-m-d', strtotime('Monday'));
+			$date['end'] = date('Y-m-d', strtotime('Sunday'));
 			$date['year'] = date('Y');
 		}
 		$objEmployee = new Employee();

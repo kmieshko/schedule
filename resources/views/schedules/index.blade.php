@@ -1,5 +1,26 @@
 @section('body')
-	<div class="content-wrapper">
+    <style>
+        .w-12 {
+            width: 12%;
+        }
+        .weekend {
+            background-color: chocolate;
+            opacity: 0.8;
+        }
+        table, table th {
+            border: solid #636b6f 2px !important;
+        }
+        .employee-name {
+            border-left: solid #636b6f 2px !important;
+            border-right: solid #636b6f 2px !important;
+        }
+        .weekend-name {
+            border-top: solid #636b6f 2px !important;
+            border-bottom: solid #636b6f 2px !important;
+        }
+    </style>
+
+    <div class="content-wrapper">
 		<!-- Content Header (Page header) -->
 		<section class="content-header">
 			<h1>
@@ -29,43 +50,36 @@
 						</div>
 						<!-- /.box-header -->
 						<div class="box-body">
-							{{--<table id="manageTable" class="table table-bordered table-striped">--}}
-								{{--<thead>--}}
-								{{--<tr>--}}
-
-								{{--</tr>--}}
-								{{--</thead>--}}
-
-							{{--</table>--}}
 							@foreach($schedules as $nb_week => $employees)
 								<table id="W{{$nb_week}}" class="table table-bordered">
-									<tr>
-										<td colspan="8">
-											{{'WEEK' . $nb_week . ' '}}
-										</td>
-									</tr>
-									<tr>
-										<td></td>
-										<td>Monday</td>
-										<td>Tuesday</td>
-										<td>Wednesday</td>
-										<td>Thursday</td>
-										<td>Friday</td>
-										<td>Saturday</td>
-										<td>Sunday</td>
-									</tr>
+                                    <thread>
+                                        <tr>
+                                            <th rowspan="3"></th>
+                                            <th  colspan="7" class="text-center">
+                                                {{'WEEK #' . $nb_week}}
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            @foreach($weekends as $weekend)
+                                                <td class="w-12 weekend-name text-center text-capitalize">{{$weekend}}</td>
+                                            @endforeach
+                                        </tr>
+                                        <tr>
+                                            @foreach($weekends as $key => $weekend)
+                                                <td class="w-12 weekend-name text-center text-capitalize">{{date('m/d/Y', strtotime($weeks[$nb_week]['week_start'] . '+'.$key.' days'))}}</td>
+                                            @endforeach
+                                        </tr>
+                                    </thread>
 									@foreach($employees as $id_employee => $employee)
 										<tr id="{{$employee['id_employee']}}">
-											<td>{{$employee['last_name'] . ' ' . $employee['first_name']}}</td>
+											<td class="employee-name">{{$employee['last_name'] . ' ' . $employee['first_name']}}</td>
 											@foreach($weekends as $weekend)
-												<td>
-													{{$employee[$weekend]}}
-												</td>
+												<td class="weekend {{$weekend}} @if($employee[$weekend]) {{'bg-warning'}} @endif"></td>
 											@endforeach
 										</tr>
 									@endforeach
-									<tr><td colspan="8"></td></tr>
 								</table>
+                                <br/>
 							@endforeach
 
 						</div>
