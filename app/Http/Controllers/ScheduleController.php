@@ -66,9 +66,8 @@ class ScheduleController extends Controller
         $employees = $objEmployee->getAllEmployeesWithDepartments();
         $data['employees'] = $employees;
         $data['latest_week'] = Schedule::max('id_week');
-        $dates = Schedule::select('week_start, week_end')->where('id_week', '=', $data['latest_week']); ///////// incorrect
-        dd($dates);
-//        $data['latest_dates'] = $dates->week_start . ' - ' . $dates->week_end;
+        $dates = Schedule::select('week_start', 'week_end')->where('id_week', '=', $data['latest_week'])->limit(1)->get();
+        $data['latest_dates'] = date('m/d/Y', strtotime($dates[0]['week_start'])) . ' - ' . date('m/d/Y', strtotime($dates[0]['week_end']));
         return view('combined')->with($data);
     }
 
@@ -299,6 +298,7 @@ class ScheduleController extends Controller
 		return $week_nb;
 	}
 
+	// first algorithm
 	public function createScheduleFirstTime($date = array(), $week_amount = 9)
 	{
 		if (empty($date)) {

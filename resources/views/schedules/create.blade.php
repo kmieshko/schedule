@@ -32,7 +32,7 @@
                                     </tr>
                                     <tr>
                                         <th>Latest dates</th>
-                                        <td>01/01/2020 - 02/02/2020</td>
+                                        <td>{{$latest_dates}}</td>
                                     </tr>
                                     </thead>
                                 </table>
@@ -47,18 +47,14 @@
                             </div>
                             <!-- /.box-header -->
                             <div class="box-body">
-                                <table id="manageTable" class="table table-bordered table-striped">
-                                    <thead>
-                                    <tr>
-                                        <th>Latest week</th>
-                                        <td>WEEK #{{$latest_week}}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Latest dates</th>
-                                        <td>01/01/2020 - 02/02/2020</td>
-                                    </tr>
-                                    </thead>
-                                </table>
+                                <div class="row">
+                                    <div class="col-md-7">
+                                        <input class="form-control input-mg" type="text" placeholder="Weeks amount">
+                                    </div>
+                                    <div class="col-md-5">
+                                        <button type="button" class="btn btn-block btn-success btn-md bg-purple">Create</button>
+                                    </div>
+                                </div>
                             </div>
                             <!-- /.box-body -->
                         </div>
