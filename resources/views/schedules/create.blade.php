@@ -1,5 +1,26 @@
 @section('body')
-	<div class="content-wrapper">
+    <style>
+        .pretty.p-switch.p-fill input:checked~.state:before {
+            border-color: #605ca8;
+            background-color: #605ca8 !important;
+        }
+        .pretty.p-switch .state label:after {
+            background-color: #605ca8 !important;
+        }
+        .box-body {
+            overflow-x: auto;
+        }
+        .p-5 {
+            padding: 5px;
+        }
+        .row {
+            margin: 0 !important;
+        }
+        .bg-purple {
+            white-space: normal !important;
+        }
+    </style>
+    <div class="content-wrapper">
 		<!-- Content Header (Page header) -->
 		<section class="content-header">
 			<h1>
@@ -18,7 +39,7 @@
 			<div class="row">
 				<div class="col-md-3">
 					<div>
-                        <div class="box">
+                        <div class="box p-5">
                             <div class="box-header">
                                 <h3 class="box-title">General Info</h3>
                             </div>
@@ -28,11 +49,15 @@
                                     <thead>
                                     <tr>
                                         <th>Latest week</th>
-                                        <td>WEEK #{{$latest_week}}</td>
+                                        <td>WEEK #<span id="latestWeek">{{$latest_week}}</span></td>
                                     </tr>
                                     <tr>
-                                        <th>Latest dates</th>
-                                        <td>{{$latest_dates}}</td>
+                                        <th>Week start</th>
+                                        <td id="weekStart">{{$week_start}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Week end</th>
+                                        <td id="weekEnd">{{$week_end}}</td>
                                     </tr>
                                     </thead>
                                 </table>
@@ -49,10 +74,14 @@
                             <div class="box-body">
                                 <div class="row">
                                     <div class="col-md-7">
-                                        <input class="form-control input-mg" type="text" placeholder="Weeks amount">
+                                        <p>
+                                            <input id="weeksAmount" class="form-control input-mg" type="text" placeholder="Weeks amount" value="1">
+                                        </p>
                                     </div>
                                     <div class="col-md-5">
-                                        <button type="button" class="btn btn-block btn-success btn-md bg-purple">Create</button>
+                                        <p>
+                                            <button id="createSchedule" type="button" class="btn btn-block btn-md bg-purple">Create</button>
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -62,7 +91,7 @@
 					<!-- /.box -->
 				</div>
                 <div class="col-md-6">
-                    <div class="box">
+                    <div class="box box-purple p-5">
                         <div class="box-header">
                             <h3 class="box-title">Check employees</h3>
                         </div>
@@ -76,10 +105,11 @@
                                     <th>Post</th>
                                     <th>Team</th>
                                     <th>Department</th>
+                                    <th>Scheduling</th>
                                 </tr>
                                 </thead>
                                 @foreach($employees as $key => $employee)
-                                    <tr id="id_employe_{{$employee->id}}">
+                                    <tr data-id="{{$employee->id}}" class="employee">
                                         <td>{{$key + 1}}</td>
                                         <td>{{$employee->last_name . ' ' . $employee->first_name}}</td>
                                         <td>
@@ -91,6 +121,14 @@
                                         </td>
                                         <td>{{'#' . $employee->nb_team}}</td>
                                         <td>{{$employee->department_name}}</td>
+                                        <td class="text-center">
+                                            <div class="pretty p-switch p-fill purple">
+                                                <input class="checkEmployee" type="checkbox" checked/>
+                                                <div class="state">
+                                                    <label></label>
+                                                </div>
+                                            </div>
+                                        </td>
                                     </tr>
                                 @endforeach
                             </table>
@@ -111,5 +149,52 @@
 			$("#mainScheduleNav").addClass('active');
 			$("#createScheduleNav").addClass('active');
 		});
+
+        $('#weeksAmount').inputFilter(function (value) {
+            return /^\d*$/.test(value);
+        });
+
+        $('#weeksAmount').on('input', function () {
+            let value = $('#weeksAmount').val();
+            if (value > 9) value = 9;
+            else if (value < 1) value = 1;
+            $('#weeksAmount').val(value);
+        });
+
+        $('#createSchedule').on('click', function () {
+            let data = {};
+            data['weeks_amount'] = $('#weeksAmount').val();
+            data['employees'] = [];
+            let employees = $('.employee .checkEmployee:checked').parents('tr');
+            employees.each(function () {
+                data['employees'].push($(this).data( "id" ));
+            });
+            $.ajax({
+                url: '/schedules/create-schedule',
+                method: 'POST',
+                data: data,
+                beforeSend: function() {
+                    $('#createSchedule').attr('disabled', true);
+                },
+                success: function (response, textStatus, xhr) {
+                    if (xhr.status === 200) {
+                        alert('Success!');
+                        $('#weekStart').text(response.data.week_start);
+                        $('#weekEnd').text(response.data.week_end);
+                        $('#latestWeek').text(response.data.latest_week);
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert(thrownError);
+                },
+                complete: function() {
+                    $('#createSchedule').attr('disabled', false);
+                }
+            })
+        });
+
+		$('#createSchedule').on('click', function () {
+
+        });
 	</script>
 @endsection

@@ -67,7 +67,8 @@ class ScheduleController extends Controller
         $data['employees'] = $employees;
         $data['latest_week'] = Schedule::max('id_week');
         $dates = Schedule::select('week_start', 'week_end')->where('id_week', '=', $data['latest_week'])->limit(1)->get();
-        $data['latest_dates'] = date('m/d/Y', strtotime($dates[0]['week_start'])) . ' - ' . date('m/d/Y', strtotime($dates[0]['week_end']));
+        $data['week_start'] = date('m/d/Y', strtotime($dates[0]['week_start']));
+        $data['week_end'] = date('m/d/Y', strtotime($dates[0]['week_end']));
         return view('combined')->with($data);
     }
 
@@ -298,8 +299,7 @@ class ScheduleController extends Controller
 		return $week_nb;
 	}
 
-	// first algorithm
-	public function createScheduleFirstTime($date = array(), $week_amount = 9)
+	public function createSchedule($date = array(), $weeks_amount = 9)
 	{
 		if (empty($date)) {
 			$date['start'] = date('Y-m-d', strtotime('Monday'));
@@ -325,7 +325,7 @@ class ScheduleController extends Controller
 		$general_employees = $this->sortGeneralEmployees($general_managers, $general_workers);
         $other_employees = $this->sortNonGeneralEmployees($other_employees);
 		$week_in_year = $this->getWeekNumber($date['start']);
-		foreach (range(1, $week_amount, 1) as $week) {
+		foreach (range(1, $weeks_amount, 1) as $week) {
 			$nb_week = $week + $week_in_year;
 			$week_dates = $this->getStartAndEndDate($nb_week, $date['year']);
 			$general_department = $this->createScheduleForGeneralEmployees($general_employees, $nb_week, $week_dates, $weekends1);
@@ -334,4 +334,20 @@ class ScheduleController extends Controller
 		}
 		return $data;
 	}
+
+	public function ajaxCreateSchedule()
+    {
+        if (!empty($_POST)) {
+            $weeks_amount = $_POST['weeks_amount'];
+            $latest_date = Schedule::max('week_end');
+            $date['start'] = date('Y-m-d', strtotime($latest_date));
+            $date['end'] = date('Y-m-d', strtotime($latest_date));
+            $date['year'] = date('Y', strtotime($latest_date));
+            $this->createSchedule($date, $weeks_amount);
+            $data['week_end'] = date('m/d/Y', strtotime(Schedule::max('week_end')));
+            $data['week_start'] = date('m/d/Y', strtotime(Schedule::max('week_start')));
+            $data['latest_week'] = Schedule::max('id_week');
+            return response()->json(array('data'=> $data), 200);
+        } else header("HTTP/1.0 403 Forbidden");
+    }
 }

@@ -2,9 +2,12 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <meta name="csrf-token" content="{{csrf_token()}}" />
     <title><?php echo $page_title ?? 'CRM'; ?></title>
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <!-- Pretty-checkbox -->
+    <link rel="stylesheet" href="    https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css"/>
     <!-- Bootstrap v3.3.7 -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <!-- Font Awesome -->
@@ -29,7 +32,16 @@
     <script src="https://cdn.bootcss.com/admin-lte/2.4.18/js/pages/dashboard.js"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="https://cdn.bootcss.com/admin-lte/2.4.18/js/demo.js"></script>
-
+    <!-- My Functions -->
+    <script src="/public/js/functions.js"></script>
+    <!-- Ajax CSRF -->
+    <script type="text/javascript">
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+    </script>
 </head>
 <body class="hold-transition skin-purple sidebar-mini">
 <div class="wrapper">
