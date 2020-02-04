@@ -310,7 +310,7 @@ class ScheduleController extends Controller
 		}
 		$objEmployee = new Employee();
 		$objSchedule = new Schedule();
-		if (empty($excluded_employes)) {
+		if (empty($excluded_employees)) {
             $general_managers = $objEmployee->getGeneralManagers();
             $general_workers = $objEmployee->getGeneralWorkers();
             $other_employees = $objEmployee->getNonGeneralEmployees();
@@ -354,7 +354,10 @@ class ScheduleController extends Controller
                 $date['end'] = date('Y-m-d', strtotime($latest_date));
                 $date['year'] = date('Y', strtotime($latest_date));
             }
-            $excluded_employees = $_POST['employees'];
+            $excluded_employees = array();
+            if (isset($_POST['employees'])) {
+                $excluded_employees = $_POST['employees'];
+            }
             $this->createSchedule($weeks_amount, $date, $excluded_employees);
             $data['week_end'] = date('m/d/Y', strtotime(Schedule::max('week_end')));
             $data['week_start'] = date('m/d/Y', strtotime(Schedule::max('week_start')));
