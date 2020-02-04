@@ -109,24 +109,29 @@ class ScheduleController extends Controller
 		return $data;
 	}
 
-    public function sortGeneralEmployees($managers, $workers)
+    public function sortGeneralEmployees($managers, $workers, $excluded_employees)
     {
         $result = array();
         foreach ($managers as $manager) {
-            $result['T' . $manager->nb_team][$manager->id] = (array)$manager;
-            foreach ($workers as $worker) {
-                if ($manager->nb_team == $worker->nb_team) {
-                    $result['T' . $worker->nb_team][$worker->id] = (array)$worker;
-                }
-            }
+        	if (array_search($manager->id, $excluded_employees) === FALSE) {
+        		$result['T' . $manager->nb_team][$manager->id] = (array)$manager;
+			}
+			foreach ($workers as $worker) {
+				if (array_search($worker->id, $excluded_employees) === FALSE) {
+					if ($manager->nb_team == $worker->nb_team) {
+						$result['T' . $worker->nb_team][$worker->id] = (array)$worker;
+					}
+				}
+			}
         }
         return $result;
     }
 
-    public function sortNonGeneralEmployees($employees)
+    public function sortNonGeneralEmployees($employees, $excluded_employees)
     {
         $result = array();
         foreach ($employees as $employee) {
+			if (array_search($employee->id, $excluded_employees) === FALSE) continue;
             $result['T' . $employee->nb_team][$employee->id] = (array)$employee;
         }
         return $result;
@@ -310,15 +315,9 @@ class ScheduleController extends Controller
 		}
 		$objEmployee = new Employee();
 		$objSchedule = new Schedule();
-		if (empty($excluded_employees)) {
-            $general_managers = $objEmployee->getGeneralManagers();
-            $general_workers = $objEmployee->getGeneralWorkers();
-            $other_employees = $objEmployee->getNonGeneralEmployees();
-        } else {
-            $general_managers = $objEmployee->getGeneralManagersExcluded($excluded_employees);
-            $general_workers = $objEmployee->getGeneralWorkersExcluded($excluded_employees);
-            $other_employees = $objEmployee->getNonGeneralEmployeesExcluded($excluded_employees);
-        }
+		$general_managers = $objEmployee->getGeneralManagers();
+		$general_workers = $objEmployee->getGeneralWorkers();
+		$other_employees = $objEmployee->getNonGeneralEmployees();
 		$tmp_weekends = $objSchedule->getWeekends();
 
 		// only days
@@ -330,8 +329,8 @@ class ScheduleController extends Controller
 		$data = array();
 		$weekends1 = $weekends;
 		$weekends2 = $weekends;
-		$general_employees = $this->sortGeneralEmployees($general_managers, $general_workers);
-        $other_employees = $this->sortNonGeneralEmployees($other_employees);
+		$general_employees = $this->sortGeneralEmployees($general_managers, $general_workers, $excluded_employees);
+        $other_employees = $this->sortNonGeneralEmployees($other_employees, $excluded_employees);
 		$week_in_year = $this->getWeekNumber($date['start']);
 		foreach (range(1, $weeks_amount, 1) as $week) {
 			$nb_week = $week + $week_in_year;

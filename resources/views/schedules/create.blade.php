@@ -164,10 +164,10 @@
         $('#createSchedule').on('click', function () {
             let data = {};
             data['weeks_amount'] = $('#weeksAmount').val();
-            data['employees'] = [];
+            data['employees'] = {};
             let employees = $('.employee .checkEmployee:not(:checked)').parents('tr');
             employees.each(function () {
-                data['employees'].push($(this).data( "id" ));
+                data['employees'][$(this).data( "id" )] = $(this).data( "id" );
             });
             $.ajax({
                 url: '/schedules/create-schedule',
@@ -191,10 +191,6 @@
                     $('#createSchedule').attr('disabled', false);
                 }
             })
-        });
-
-		$('#createSchedule').on('click', function () {
-
         });
 	</script>
 @endsection
