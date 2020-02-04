@@ -62,4 +62,34 @@ class Employee extends Model
             ->toArray();
         return $data;
     }
+
+    public function getNonGeneralEmployeesExcluded($employees)
+    {
+        $data = DB::table('employees')
+            ->where('id_department', '!=', 1)
+            ->whereNotIn('id', $employees)
+            ->get()
+            ->toArray();
+        return $data;
+    }
+
+    public function getGeneralWorkersExcluded($employees)
+    {
+        $data = DB::table('employees')
+            ->where('is_manager', '=', 0)
+            ->whereNotIn('id', $employees)
+            ->get()
+            ->toArray();
+        return $data;
+    }
+
+    public function getGeneralManagersExcluded($employees)
+    {
+        $data = DB::table('employees')
+            ->where('is_manager', '=', 1)
+            ->whereNotIn('id', $employees)
+            ->get()
+            ->toArray();
+        return $data;
+    }
 }

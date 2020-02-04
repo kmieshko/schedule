@@ -67,8 +67,10 @@ class ScheduleController extends Controller
         $data['employees'] = $employees;
         $data['latest_week'] = Schedule::max('id_week');
         $dates = Schedule::select('week_start', 'week_end')->where('id_week', '=', $data['latest_week'])->limit(1)->get();
-        $data['week_start'] = date('m/d/Y', strtotime($dates[0]['week_start']));
-        $data['week_end'] = date('m/d/Y', strtotime($dates[0]['week_end']));
+        $week_start = isset($dates[0]) ? date('m/d/Y', strtotime($dates[0]['week_start'])) : '';
+        $week_end = isset($dates[0]) ? date('m/d/Y', strtotime($dates[0]['week_end'])) : '';
+        $data['week_start'] = $week_start;
+        $data['week_end'] = $week_end;
         return view('combined')->with($data);
     }
 
@@ -299,7 +301,7 @@ class ScheduleController extends Controller
 		return $week_nb;
 	}
 
-	public function createSchedule($date = array(), $weeks_amount = 9)
+	public function createSchedule($weeks_amount = 9, $date = array(), $excluded_employees = array())
 	{
 		if (empty($date)) {
 			$date['start'] = date('Y-m-d', strtotime('Monday'));
@@ -308,9 +310,15 @@ class ScheduleController extends Controller
 		}
 		$objEmployee = new Employee();
 		$objSchedule = new Schedule();
-		$general_managers = $objEmployee->getGeneralManagers();
-		$general_workers = $objEmployee->getGeneralWorkers();
-		$other_employees = $objEmployee->getNonGeneralEmployees();
+		if (empty($excluded_employes)) {
+            $general_managers = $objEmployee->getGeneralManagers();
+            $general_workers = $objEmployee->getGeneralWorkers();
+            $other_employees = $objEmployee->getNonGeneralEmployees();
+        } else {
+            $general_managers = $objEmployee->getGeneralManagersExcluded($excluded_employees);
+            $general_workers = $objEmployee->getGeneralWorkersExcluded($excluded_employees);
+            $other_employees = $objEmployee->getNonGeneralEmployeesExcluded($excluded_employees);
+        }
 		$tmp_weekends = $objSchedule->getWeekends();
 
 		// only days
@@ -339,11 +347,15 @@ class ScheduleController extends Controller
     {
         if (!empty($_POST)) {
             $weeks_amount = $_POST['weeks_amount'];
+            $date = array();
             $latest_date = Schedule::max('week_end');
-            $date['start'] = date('Y-m-d', strtotime($latest_date));
-            $date['end'] = date('Y-m-d', strtotime($latest_date));
-            $date['year'] = date('Y', strtotime($latest_date));
-            $this->createSchedule($date, $weeks_amount);
+            if (!empty($latest_date)) {
+                $date['start'] = date('Y-m-d', strtotime($latest_date));
+                $date['end'] = date('Y-m-d', strtotime($latest_date));
+                $date['year'] = date('Y', strtotime($latest_date));
+            }
+            $excluded_employees = $_POST['employees'];
+            $this->createSchedule($weeks_amount, $date, $excluded_employees);
             $data['week_end'] = date('m/d/Y', strtotime(Schedule::max('week_end')));
             $data['week_start'] = date('m/d/Y', strtotime(Schedule::max('week_start')));
             $data['latest_week'] = Schedule::max('id_week');

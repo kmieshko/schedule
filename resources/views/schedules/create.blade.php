@@ -165,7 +165,7 @@
             let data = {};
             data['weeks_amount'] = $('#weeksAmount').val();
             data['employees'] = [];
-            let employees = $('.employee .checkEmployee:checked').parents('tr');
+            let employees = $('.employee .checkEmployee:not(:checked)').parents('tr');
             employees.each(function () {
                 data['employees'].push($(this).data( "id" ));
             });
