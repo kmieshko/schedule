@@ -262,7 +262,6 @@ class ScheduleController extends Controller
         $other_employees = $this->sortNonGeneralEmployees($other_employees, $excluded_employees);
         $week_in_year = $this->getWeekNumber($date['start']);
 
-
 		// if it's not a first scheduling - check last day and shifting weekends
 		$latest_week = Schedule::max('id_week');
 		if (!empty($latest_week)) {
@@ -287,32 +286,30 @@ class ScheduleController extends Controller
 
 	public function ajaxCreateSchedule()
     {
-        if (!empty($_POST)) {
-			$weeks_amount = 1;
-        	if (isset($_POST['weeks_amount'])) {
-				$weeks_amount = intval($_POST['weeks_amount']);
-				$weeks_amount = $weeks_amount < 1 ? 1 : $weeks_amount;
-			}
-            $date = array();
-            $latest_date = Schedule::max('week_end');
-            if (!empty($latest_date)) {
-                $date['start'] = date('Y-m-d', strtotime($latest_date));
-                $date['end'] = date('Y-m-d', strtotime($latest_date));
-                $date['year'] = date('Y', strtotime($latest_date));
-            } else {
-				$date['start'] = date('Y-m-d', strtotime('Monday'));
-				$date['end'] = date('Y-m-d', strtotime('Sunday'));
-				$date['year'] = date('Y');
-			}
-            $excluded_employees = array();
-            if (isset($_POST['employees'])) {
-                $excluded_employees = $_POST['employees'];
-            }
-            $this->createSchedule($date, $weeks_amount, $excluded_employees);
-            $data['week_end'] = date('m/d/Y', strtotime(Schedule::max('week_end')));
-            $data['week_start'] = date('m/d/Y', strtotime(Schedule::max('week_start')));
-            $data['latest_week'] = Schedule::max('id_week');
-            return response()->json(array('data'=> $data), 200);
-        } else header("HTTP/1.0 403 Forbidden");
+        $weeks_amount = 1;
+        if (isset($_POST['weeks_amount'])) {
+            $weeks_amount = intval($_POST['weeks_amount']);
+            $weeks_amount = $weeks_amount < 1 ? 1 : $weeks_amount;
+        }
+        $date = array();
+        $latest_date = Schedule::max('week_end');
+        if (!empty($latest_date)) {
+            $date['start'] = date('Y-m-d', strtotime($latest_date));
+            $date['end'] = date('Y-m-d', strtotime($latest_date));
+            $date['year'] = date('Y', strtotime($latest_date));
+        } else {
+            $date['start'] = date('Y-m-d', strtotime('Monday'));
+            $date['end'] = date('Y-m-d', strtotime('Sunday'));
+            $date['year'] = date('Y');
+        }
+        $excluded_employees = array();
+        if (isset($_POST['employees'])) {
+            $excluded_employees = $_POST['employees'];
+        }
+        $this->createSchedule($date, $weeks_amount, $excluded_employees);
+        $data['week_end'] = date('m/d/Y', strtotime(Schedule::max('week_end')));
+        $data['week_start'] = date('m/d/Y', strtotime(Schedule::max('week_start')));
+        $data['latest_week'] = Schedule::max('id_week');
+        return response()->json(array('data'=> $data), 200);
     }
 }
