@@ -141,7 +141,7 @@ class ScheduleController extends Controller
                         $last_saturday = $objSchedule->checkWeekendByTeam($nb_week - 1, $employee['nb_team']);
                         $before_last_saturday = $objSchedule->checkWeekendByTeam($nb_week - 2, $employee['nb_team']);
                         if ((empty($last_saturday) || !$last_saturday->saturday) &&
-                            (empty($before_last_saturday) || !$before_last_saturday->saturday)) { // if team hadn't Saturday in latest 2 weeks - weekend is Saturday
+                            (empty($before_last_saturday) || !$before_last_saturday->saturday)) { // if team hadn't Saturday in latest 2 weeks - weekend is current Saturday
 							$insert_data = array(
 								'id_week' => $nb_week,
 								'id_employee' => $employee['id'],
@@ -299,6 +299,19 @@ class ScheduleController extends Controller
 		return $result;
 	}
 
+	public function shiftWeekends(&$weekends, $latest_day)
+    {
+        while (1) {
+            if (current($weekends) == $latest_day) {
+                if (current($weekends) == 'friday') reset($weekends);
+                else next($weekends);
+                break;
+            }
+            if (current($weekends) == 'friday') reset($weekends);
+            else next($weekends);
+        }
+    }
+
 	public function createSchedule($date, $weeks_amount, $excluded_employees)
 	{
 		$objEmployee = new Employee();
@@ -310,14 +323,13 @@ class ScheduleController extends Controller
 
 		$weekends1 = $weekends;
 		$weekends2 = $weekends;
-//		$latest_week = Schedule::max('id_week');
-//		if (!empty($latest_week)) {
-//			$latest_day_for_general = array_search ('1', (array)$objSchedule->getLatestDayForGeneral($latest_week));
-//			$latest_day_for_non_general = array_search ('1', (array)$objSchedule->getLatestDayForNonGeneral($latest_week));
-//			while (current($weekends1) != $latest_day_for_general) {
-//				next($weekends1);
-//			}
-//		}
+		$latest_week = Schedule::max('id_week');
+		if (!empty($latest_week)) {
+			$latest_day_for_general = array_search ('1', (array)$objSchedule->getLatestDayForGeneral($latest_week));
+			$latest_day_for_non_general = array_search ('1', (array)$objSchedule->getLatestDayForNonGeneral($latest_week));
+			$this->shiftWeekends($weekends1, $latest_day_for_general);
+			$this->shiftWeekends($weekends2, $latest_day_for_non_general);
+		}
 
 		$general_employees = $this->sortGeneralEmployees($general_managers, $general_workers, $excluded_employees);
         $other_employees = $this->sortNonGeneralEmployees($other_employees, $excluded_employees);
