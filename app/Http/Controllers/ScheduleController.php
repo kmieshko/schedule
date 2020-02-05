@@ -42,12 +42,7 @@ class ScheduleController extends Controller
 			$weeks[$week] = $this->getStartAndEndDate($week, date('Y'));
 		}
 
-		// only days
-		$tmp_weekends = $objSchedule->getWeekends();
-		$weekends = array();
-		foreach ($tmp_weekends as $weekend) {
-			$weekends[] = strtolower($weekend->day);
-		}
+		$weekends = $this->getOnlyDays($objSchedule->getWeekends());
 		$weekends[] = 'sunday';
 
 		$data['weeks'] = $weeks;
@@ -80,13 +75,7 @@ class ScheduleController extends Controller
 		$objSchedule = new Schedule();
 		$objEmployee = new Employee();
 		$tmp_employees = $objEmployee->getAllEmployees();
-		$tmp_week_days = $objSchedule->getWeekends();
-
-		// only days
-		$week_days = array();
-		foreach ($tmp_week_days as $week_day) {
-			$week_days[] = strtolower($week_day->day);
-		}
+		$weekends = $this->getOnlyDays($objSchedule->getWeekends());
 
 		// id_employee => employee info
 		$employees = array();
@@ -100,8 +89,8 @@ class ScheduleController extends Controller
                 $data[$schedule->id_week][$schedule->id_employee]['id_employee'] = $schedule->id_employee;
                 $data[$schedule->id_week][$schedule->id_employee]['first_name'] = $employees[$schedule->id_employee]['first_name'];
                 $data[$schedule->id_week][$schedule->id_employee]['last_name'] = $employees[$schedule->id_employee]['last_name'];
-                foreach ($week_days as $week_day) {
-                    $data[$schedule->id_week][$schedule->id_employee][$week_day] = $schedule->$week_day;
+                foreach ($weekends as $weekend) {
+                    $data[$schedule->id_week][$schedule->id_employee][$weekend] = $schedule->$weekend;
                 }
                 $data[$schedule->id_week][$schedule->id_employee]['sunday'] = 1;
             }
@@ -131,8 +120,9 @@ class ScheduleController extends Controller
     {
         $result = array();
         foreach ($employees as $employee) {
-			if (array_search($employee->id, $excluded_employees) === FALSE) continue;
-            $result['T' . $employee->nb_team][$employee->id] = (array)$employee;
+			if (array_search($employee->id, $excluded_employees) === FALSE) {
+				$result['T' . $employee->nb_team][$employee->id] = (array)$employee;
+			}
         }
         return $result;
     }
@@ -285,12 +275,6 @@ class ScheduleController extends Controller
         }
     }
 
-    public function mergeSchedule($general_employees, $other_departments)
-    {
-        $data = array();
-        return $data;
-    }
-
 	public function getStartAndEndDate($week, $year) {
 		$dto = new DateTime();
 		$dto->setISODate($year, $week);
@@ -306,58 +290,70 @@ class ScheduleController extends Controller
 		return $week_nb;
 	}
 
-	public function createSchedule($weeks_amount = 9, $date = array(), $excluded_employees = array())
+	public function getOnlyDays($weekends)
 	{
-		if (empty($date)) {
-			$date['start'] = date('Y-m-d', strtotime('Monday'));
-			$date['end'] = date('Y-m-d', strtotime('Sunday'));
-			$date['year'] = date('Y');
+		$result = array();
+		foreach ($weekends as $weekend) {
+			$result[] = strtolower($weekend->day);
 		}
+		return $result;
+	}
+
+	public function createSchedule($date, $weeks_amount, $excluded_employees)
+	{
 		$objEmployee = new Employee();
 		$objSchedule = new Schedule();
 		$general_managers = $objEmployee->getGeneralManagers();
 		$general_workers = $objEmployee->getGeneralWorkers();
 		$other_employees = $objEmployee->getNonGeneralEmployees();
-		$tmp_weekends = $objSchedule->getWeekends();
+		$weekends = $this->getOnlyDays($objSchedule->getWeekends());
 
-		// only days
-        $weekends = array();
-		foreach ($tmp_weekends as $weekend) {
-			$weekends[] = strtolower($weekend->day);
-		}
-
-		$data = array();
 		$weekends1 = $weekends;
 		$weekends2 = $weekends;
+//		$latest_week = Schedule::max('id_week');
+//		if (!empty($latest_week)) {
+//			$latest_day_for_general = array_search ('1', (array)$objSchedule->getLatestDayForGeneral($latest_week));
+//			$latest_day_for_non_general = array_search ('1', (array)$objSchedule->getLatestDayForNonGeneral($latest_week));
+//			while (current($weekends1) != $latest_day_for_general) {
+//				next($weekends1);
+//			}
+//		}
+
 		$general_employees = $this->sortGeneralEmployees($general_managers, $general_workers, $excluded_employees);
         $other_employees = $this->sortNonGeneralEmployees($other_employees, $excluded_employees);
 		$week_in_year = $this->getWeekNumber($date['start']);
 		foreach (range(1, $weeks_amount, 1) as $week) {
 			$nb_week = $week + $week_in_year;
 			$week_dates = $this->getStartAndEndDate($nb_week, $date['year']);
-			$general_department = $this->createScheduleForGeneralEmployees($general_employees, $nb_week, $week_dates, $weekends1);
-			$other_departments = $this->createScheduleForNonGeneralEmployees($other_employees, $nb_week, $week_dates, $weekends2);
-			$data = $this->mergeSchedule($general_department, $other_departments);
+			$this->createScheduleForGeneralEmployees($general_employees, $nb_week, $week_dates, $weekends1);
+			$this->createScheduleForNonGeneralEmployees($other_employees, $nb_week, $week_dates, $weekends2);
 		}
-		return $data;
 	}
 
 	public function ajaxCreateSchedule()
     {
         if (!empty($_POST)) {
-            $weeks_amount = $_POST['weeks_amount'];
+			$weeks_amount = 1;
+        	if (isset($_POST['weeks_amount'])) {
+				$weeks_amount = intval($_POST['weeks_amount']);
+				$weeks_amount = $weeks_amount < 1 ? 1 : $weeks_amount;
+			}
             $date = array();
             $latest_date = Schedule::max('week_end');
             if (!empty($latest_date)) {
                 $date['start'] = date('Y-m-d', strtotime($latest_date));
                 $date['end'] = date('Y-m-d', strtotime($latest_date));
                 $date['year'] = date('Y', strtotime($latest_date));
-            }
+            } else {
+				$date['start'] = date('Y-m-d', strtotime('Monday'));
+				$date['end'] = date('Y-m-d', strtotime('Sunday'));
+				$date['year'] = date('Y');
+			}
             $excluded_employees = array();
             if (isset($_POST['employees'])) {
                 $excluded_employees = $_POST['employees'];
             }
-            $this->createSchedule($weeks_amount, $date, $excluded_employees);
+            $this->createSchedule($date, $weeks_amount, $excluded_employees);
             $data['week_end'] = date('m/d/Y', strtotime(Schedule::max('week_end')));
             $data['week_start'] = date('m/d/Y', strtotime(Schedule::max('week_start')));
             $data['latest_week'] = Schedule::max('id_week');

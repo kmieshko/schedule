@@ -106,4 +106,36 @@ class Schedule extends Model
 		}
 		return $data;
 	}
+
+	public function getLatestDayForGeneral($latest_week)
+	{
+		$result = DB::table('schedules')
+			->select('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday')
+			->where('id_department', '=', 1)
+			->where('id_week', '=', $latest_week)
+			->orderBy('id', 'desc')
+			->limit(1)
+			->get()
+			->toArray();
+		if (!empty($result)) {
+			$result = $result[0];
+		}
+		return $result;
+	}
+
+	public function getLatestDayForNonGeneral($latest_week)
+	{
+		$result = DB::table('schedules')
+			->select('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday')
+			->where('id_department', '!=', 1)
+			->where('id_week', '=', $latest_week)
+			->orderBy('id', 'desc')
+			->limit(1)
+			->get()
+			->toArray();
+		if (!empty($result)) {
+			$result = $result[0];
+		}
+		return $result;
+	}
 }
