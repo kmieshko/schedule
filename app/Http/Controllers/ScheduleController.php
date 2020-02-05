@@ -320,9 +320,20 @@ class ScheduleController extends Controller
 		$general_workers = $objEmployee->getGeneralWorkers();
 		$other_employees = $objEmployee->getNonGeneralEmployees();
 		$weekends = $this->getOnlyDays($objSchedule->getWeekends());
+        $weekends1 = $weekends;
+        $weekends2 = $weekends;
 
-		$weekends1 = $weekends;
-		$weekends2 = $weekends;
+        // sorting by a team with condition that manager has to be a first worker in a team's array
+        // and removing excluded workers
+        $general_employees = $this->sortGeneralEmployees($general_managers, $general_workers, $excluded_employees);
+
+        // sorting by a team without any conditions, because non general employees haven't managers in team
+        // and removing excluded workers
+        $other_employees = $this->sortNonGeneralEmployees($other_employees, $excluded_employees);
+        $week_in_year = $this->getWeekNumber($date['start']);
+
+
+		// if it's not a first scheduling - check last day and shifting weekends
 		$latest_week = Schedule::max('id_week');
 		if (!empty($latest_week)) {
 			$latest_day_for_general = array_search ('1', (array)$objSchedule->getLatestDayForGeneral($latest_week));
@@ -331,9 +342,7 @@ class ScheduleController extends Controller
 			$this->shiftWeekends($weekends2, $latest_day_for_non_general);
 		}
 
-		$general_employees = $this->sortGeneralEmployees($general_managers, $general_workers, $excluded_employees);
-        $other_employees = $this->sortNonGeneralEmployees($other_employees, $excluded_employees);
-		$week_in_year = $this->getWeekNumber($date['start']);
+		// main loop with algorithm
 		foreach (range(1, $weeks_amount, 1) as $week) {
 			$nb_week = $week + $week_in_year;
 			$week_dates = $this->getStartAndEndDate($nb_week, $date['year']);
