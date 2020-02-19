@@ -95,16 +95,13 @@ class Schedule extends Model
 
 	public function checkWeekendByTeam($nb_week, $nb_team)
 	{
-		$data = DB::table('schedules')->where([
+		$result = DB::table('schedules')->where([
 			['id_week', '=', $nb_week],
 			['nb_team', '=', $nb_team],
 		])
 			->get()
 			->toArray();
-		if (!empty($data)) {
-			$data = $data[0];
-		}
-		return $data;
+		return !empty($result) ? $result[0] : array();
 	}
 
 	public function getLatestDayForGeneral($latest_week)
@@ -118,10 +115,7 @@ class Schedule extends Model
 			->limit(1)
 			->get()
 			->toArray();
-		if (!empty($result)) {
-			$result = $result[0];
-		}
-		return $result;
+		return !empty($result) ? $result[0] : array();
 	}
 
 	public function getLatestDayForNonGeneral($latest_week)
@@ -135,9 +129,6 @@ class Schedule extends Model
 			->limit(1)
 			->get()
 			->toArray();
-		if (!empty($result)) {
-			$result = $result[0];
-		}
-		return $result;
+		return !empty($result) ? $result[0] : array();
 	}
 }
