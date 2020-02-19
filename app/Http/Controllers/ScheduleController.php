@@ -160,7 +160,7 @@ class ScheduleController extends Controller
                                 'day' => 'saturday',
                                 'week_start' => $week_dates['week_start'],
                                 'week_end' => $week_dates['week_end'],
-                            );                            
+                            );
                             $objSchedule->insertWeekend($insert_data);
                             $data['W' . $nb_week]['saturday'][$employee['id']] = $employee;
                             $tmp_key = $key;
