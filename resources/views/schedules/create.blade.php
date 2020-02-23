@@ -174,7 +174,7 @@
                 method: 'POST',
                 data: data,
                 beforeSend: function() {
-//                    $('#createSchedule').attr('disabled', true);
+                    $('#createSchedule').attr('disabled', true);
                 },
                 success: function (response, textStatus, xhr) {
                     if (xhr.status === 200) {
@@ -188,7 +188,7 @@
                     alert(thrownError);
                 },
                 complete: function() {
-//                    $('#createSchedule').attr('disabled', false);
+                    $('#createSchedule').attr('disabled', false);
                 }
             })
         });

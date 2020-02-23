@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
 use App\User;
 use App\Schedule;
 use App\Employee;
@@ -15,6 +14,7 @@ class ScheduleController extends Controller
 {
 
 	public $data = array();
+	public $request = null;
 
 	public function __construct()
 	{
@@ -22,6 +22,7 @@ class ScheduleController extends Controller
 
 //		$this->not_logged_in();
 
+		$this->request = new Request();
 		$this->data['page_title'] = 'Schedules';
 	}
 
@@ -319,4 +320,40 @@ class ScheduleController extends Controller
         $data['latest_week'] = Schedule::max('id_week');
         return response()->json(array('data'=> $data), 200);
     }
+
+    public function ajaxDownloadSchedule()
+	{
+		$id_week = $_POST['id_week'];
+		$objSchedule = new Schedule();
+		$result = $objSchedule->getScheduleByWeek($id_week);
+		$teams = array();
+		$week_start = '';
+		$week_end = '';
+		foreach ($result as $value) {
+			$teams[$value->nb_team][] = (array)$value;
+			if (empty($week_start)) $week_start = $value->week_start;
+			if (empty($week_end)) $week_end = $value->week_end;
+		}
+		$this->request->session()->put('teams', $teams);
+		$this->request->session()->put('id_week', $id_week);
+		$this->request->session()->put('week_start', $week_start);
+		$this->request->session()->put('week_end', $week_end);
+
+
+//		$data['teams'] = $teams;
+//		$data['id_week'] = $id_week;
+//		$data['week_start'] = $week_start;
+//		$data['week_end'] = $week_end;
+//		return response()->json(array('data'=> $data), 200);
+		return response()->json(null, 200);
+	}
+
+	public function downloadScheduleExcel()
+	{
+		$teams = $this->request->session()->pull('teams');
+		$id_week = $this->request->session()->pull('id_week');
+		$week_start = $this->request->session()->pull('week_start');
+		$week_end = $this->request->session()->pull('week_end');
+
+	}
 }

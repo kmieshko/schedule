@@ -131,4 +131,15 @@ class Schedule extends Model
 			->toArray();
 		return !empty($result) ? $result[0] : array();
 	}
+
+	public function getScheduleByWeek($id_week)
+	{
+		$result = DB::table('schedules')
+			->join('employees', 'employees.id', '=', 'schedules.id_employee')
+			->select('schedules.*', 'employees.first_name', 'employees.last_name')
+			->where('id_week', '=', $id_week)
+			->get()
+			->toArray();
+		return $result;
+	}
 }

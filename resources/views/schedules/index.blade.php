@@ -67,6 +67,7 @@
                                     {{'WEEK #' . $nb_week . ' ' . date('m/d/Y', strtotime($weeks[$nb_week]['week_start'])) . ' - ' . date('m/d/Y', strtotime($weeks[$nb_week]['week_end']))}}
                                 </h4>
                                 <div class="box-tools pull-right">
+									<button data-id_week="{{$nb_week}}" class="btn btn-default btn-sm download-schedule">Excel</button>
                                     <button class="btn btn-default btn-sm" data-widget="collapse"><i class="fa fa-plus"></i></button>
                                 </div>
                             </div>
@@ -112,9 +113,35 @@
 	</div>
 
 	<script>
-		$( document ).ready(function() {
+		$(document).ready(function() {
 			$("#mainScheduleNav").addClass('active');
 			$("#viewScheduleNav").addClass('active');
 		});
+
+		$('.download-schedule').on('click', function (e) {
+			let id_week = $(e.target).data("id_week");
+			let data = {};
+			data['id_week'] = id_week;
+			$.ajax({
+				url: '/schedules/download-schedule',
+				method: 'POST',
+				data: data,
+				beforeSend: function () {
+					$('button').attr('disabled', true);
+				},
+				success: function (response, textStatus, xhr) {
+					if (xhr.status === 200) {
+						console.log(response.teams);
+//						window.location.href = '/schedules/download-schedule-excel';
+					}
+				},
+				error: function (xhr, ajaxOptions, thrownError) {
+					alert(thrownError);
+				},
+				complete: function () {
+					$('button').attr('disabled', false);
+				}
+			})
+		})
 	</script>
 @endsection
