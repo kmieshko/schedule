@@ -53,6 +53,58 @@ class ScheduleController extends Controller
 		return view('combined')->with($data);
 	}
 
+	public function index2()
+	{
+		$data = $this->data;
+		$data['view'] = 'schedules.index2';
+		$data['user_permission'] = '';
+
+		$objSchedule = new Schedule();
+		$tmp_schedules = $objSchedule->getAllWeeksSchedules();
+		$schedules = array();
+		foreach ($tmp_schedules as $item) {
+			$schedules[$item->id_week] = $item->id_week;
+		}
+		$data['schedules'] = $schedules;
+
+		// nb_week => [week_start, week_end]
+		$tmp_weeks = array_keys($data['schedules']);
+		$weeks = array();
+		foreach ($tmp_weeks as $week) {
+			$weeks[$week] = $this->getStartAndEndDate($week, date('Y'));
+		}
+		$data['weeks'] = $weeks;
+		$data['current_week'] = $this->getWeekNumber(date('m/d/Y'));
+		$data['current_week_dates'] =  $this->getStartAndEndDate($data['current_week'], date('Y'));
+		return view('combined')->with($data);
+	}
+
+	public function ajaxScheduleByWeek()
+	{
+		$id_week = $_POST['id_week'];
+		$objSchedule = new Schedule();
+		$schedules = $objSchedule->getScheduleByWeek($id_week);
+		$data['schedules'] = $this->sortSchedules($schedules);
+
+		// nb_week => [week_start, week_end]
+		$tmp_weeks = array_keys($data['schedules']);
+		$weeks = array();
+		foreach ($tmp_weeks as $week) {
+			$weeks[$week] = $this->getStartAndEndDate($week, date('Y'));
+		}
+
+		$weekends = $this->getOnlyDays($objSchedule->getWeekends());
+		$weekends[] = 'sunday';
+
+		$data['weeks'] = $weeks;
+		$data['weekends'] = $weekends;
+		$data['week_start'] = date('m/d/Y', strtotime($weeks[$id_week]['week_start']));
+		$data['week_end'] = date('m/d/Y', strtotime($weeks[$id_week]['week_end']));
+//		$data['current_week'] = $this->getWeekNumber(date('m/d/Y'));
+//		$data['current_week_dates'] =  $this->getStartAndEndDate($data['current_week'], date('Y'));
+		return response()->json($data, 200);
+	}
+
 	public function create()
     {
         $data = $this->data;
@@ -321,7 +373,7 @@ class ScheduleController extends Controller
         return response()->json(array('data'=> $data), 200);
     }
 
-    public function ajaxDownloadSchedule()
+    public function ajaxDownloadSchedule(Request $request)
 	{
 		$id_week = $_POST['id_week'];
 		$objSchedule = new Schedule();
@@ -334,21 +386,14 @@ class ScheduleController extends Controller
 			if (empty($week_start)) $week_start = $value->week_start;
 			if (empty($week_end)) $week_end = $value->week_end;
 		}
-		$this->request->session()->put('teams', $teams);
-		$this->request->session()->put('id_week', $id_week);
-		$this->request->session()->put('week_start', $week_start);
-		$this->request->session()->put('week_end', $week_end);
-
-
-//		$data['teams'] = $teams;
-//		$data['id_week'] = $id_week;
-//		$data['week_start'] = $week_start;
-//		$data['week_end'] = $week_end;
-//		return response()->json(array('data'=> $data), 200);
+		$request->session()->put('teams', $teams);
+		$request->session()->put('id_week', $id_week);
+		$request->session()->put('week_start', $week_start);
+		$request->session()->put('week_end', $week_end);
 		return response()->json(null, 200);
 	}
 
-	public function downloadScheduleExcel()
+	public function downloadScheduleExcel(Request $request)
 	{
 		$teams = $this->request->session()->pull('teams');
 		$id_week = $this->request->session()->pull('id_week');

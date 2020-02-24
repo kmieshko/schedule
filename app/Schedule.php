@@ -15,6 +15,16 @@ class Schedule extends Model
 		return	$data;
 	}
 
+	public function getAllWeeksSchedules()
+	{
+		$data = DB::table("schedules")
+			->select('id_week')
+			->distinct()
+			->get()
+			->toArray();
+		return	$data;
+	}
+
     public function getLatestSchedule()
     {
 		$data = DB::table("schedules")
