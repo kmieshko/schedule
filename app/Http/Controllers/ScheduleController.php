@@ -8,7 +8,6 @@ use App\User;
 use App\Schedule;
 use App\Employee;
 use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\Debug\Debug;
 use DateTime;
 
@@ -375,53 +374,43 @@ class ScheduleController extends Controller
 
     public function ajaxDownloadSchedule(Request $request)
 	{
-        $nb_week = $_POST['id_week'];
-		$objSchedule = new Schedule();
-		$result = $objSchedule->getScheduleByWeek($nb_week);
-		$teams = array();
-		$week_start = '';
-		$week_end = '';
-		foreach ($result as $value) {
-			$teams[$value->nb_team][] = (array)$value;
-			if (empty($week_start)) $week_start = $value->week_start;
-			if (empty($week_end)) $week_end = $value->week_end;
-		}
-//		$request->session()->put('teams', $teams);
-//		$request->session()->put('nb_week', $nb_week);
-//		$request->session()->put('week_start', $week_start);
-//		$request->session()->put('week_end', $week_end);
-
-
-
-//        $data['nb_week'] = $this->request->session()->pull('nb_week');
-        $data['nb_week'] = $nb_week;
-//        $objSchedule = new Schedule();
-        $schedules = $objSchedule->getScheduleByWeek($nb_week);
-        $data['schedules'] = $this->sortSchedules($schedules);
-        $data['schedules'] = $schedules;
-
-        // nb_week => [week_start, week_end]
-        $tmp_weeks = array_keys($data['schedules']);
-        $weeks = array();
-        foreach ($tmp_weeks as $week) {
-            $weeks[$week] = $this->getStartAndEndDate($week, date('Y'));
+	    if ($request->session()->has('nb_week')) {
+            $nb_week = $request->session()->pull('nb_week');
+        } else {
+            $nb_week = $_POST['id_week'];
+            $request->session()->put('nb_week', $nb_week);
         }
-        $data['weeks'] = $weeks;
-        $data['current_week'] = $this->getWeekNumber(date('m/d/Y'));
-        $data['current_week_dates'] =  $this->getStartAndEndDate($data['current_week'], date('Y'));
-        $weekends = $this->getOnlyDays($objSchedule->getWeekends());
-        $weekends[] = 'sunday';
-        $data['weekends'] = $weekends;
-        $request->session()->put('data', $data);
-        $request->session()->put('test', '123');
-		return response()->json(null, 200);
-	}
+        if (isset($_POST['id_week']) && !empty($_POST['id_week'])) {
+            return response()->json(null, 200);
+        } else {
+            $objSchedule = new Schedule();
+            $result = $objSchedule->getScheduleByWeek($nb_week);
+            $teams = array();
+            $week_start = '';
+            $week_end = '';
+            foreach ($result as $value) {
+                $teams[$value->nb_team][] = (array)$value;
+                if (empty($week_start)) $week_start = $value->week_start;
+                if (empty($week_end)) $week_end = $value->week_end;
+            }
+            $data['nb_week'] = $nb_week;
+            $schedules = $objSchedule->getScheduleByWeek($nb_week);
+            $data['schedules'] = $this->sortSchedules($schedules);
+            $data['schedules'] = $schedules;
 
-	public function downloadScheduleExcel(Request $request)
-	{
-	    $data = $request->session()->pull('data');
-	    $test = $request->session()->pull('test');
-	    // session doesn't work
-        return Excel::download(new ScheduleExport($data), 'schedule.xlsx');
+            // nb_week => [week_start, week_end]
+            $tmp_weeks = array_keys($data['schedules']);
+            $weeks = array();
+            foreach ($tmp_weeks as $week) {
+                $weeks[$week] = $this->getStartAndEndDate($week, date('Y'));
+            }
+            $data['weeks'] = $weeks;
+            $data['current_week'] = $this->getWeekNumber(date('m/d/Y'));
+            $data['current_week_dates'] =  $this->getStartAndEndDate($data['current_week'], date('Y'));
+            $weekends = $this->getOnlyDays($objSchedule->getWeekends());
+            $weekends[] = 'sunday';
+            $data['weekends'] = $weekends;
+            return Excel::download(new ScheduleExport($data), 'schedule.xlsx');
+        }
 	}
 }
