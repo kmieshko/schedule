@@ -397,6 +397,5 @@ class ScheduleController extends Controller
 		$id_week = $this->request->session()->pull('id_week');
 		$week_start = $this->request->session()->pull('week_start');
 		$week_end = $this->request->session()->pull('week_end');
-
 	}
 }
