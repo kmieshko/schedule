@@ -100,8 +100,6 @@ class ScheduleController extends Controller
 		$data['weekends'] = $weekends;
 		$data['week_start'] = date('m/d/Y', strtotime($weeks[$id_week]['week_start']));
 		$data['week_end'] = date('m/d/Y', strtotime($weeks[$id_week]['week_end']));
-//		$data['current_week'] = $this->getWeekNumber(date('m/d/Y'));
-//		$data['current_week_dates'] =  $this->getStartAndEndDate($data['current_week'], date('Y'));
 		return response()->json($data, 200);
 	}
 
