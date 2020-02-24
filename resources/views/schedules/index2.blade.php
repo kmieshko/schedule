@@ -128,8 +128,7 @@
 				},
 				success: function (response, textStatus, xhr) {
 					if (xhr.status === 200) {
-						console.log(response.teams);
-//						window.location.href = '/schedules/download-schedule-excel';
+						window.location.href = '/schedules/download-schedule-excel';
 					}
 				},
 				error: function (xhr, ajaxOptions, thrownError) {

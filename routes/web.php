@@ -22,4 +22,4 @@ Route::post('/schedules/schedule-by-week', 'ScheduleController@ajaxScheduleByWee
 Route::get('/schedules/create', 'ScheduleController@create');
 Route::post('/schedules/create-schedule', 'ScheduleController@ajaxCreateSchedule');
 Route::post('/schedules/download-schedule', 'ScheduleController@ajaxDownloadSchedule');
-Route::post('/schedules/download-schedule-excel', 'ScheduleController@downloadScheduleExcel');
+Route::get('/schedules/download-schedule-excel', 'ScheduleController@downloadScheduleExcel');
