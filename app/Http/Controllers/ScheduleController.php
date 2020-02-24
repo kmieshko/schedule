@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Exports\ScheduleExport;
 use Illuminate\Http\Request;
 use App\User;
 use App\Schedule;
 use App\Employee;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\Debug\Debug;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use DateTime;
 
 class ScheduleController extends Controller
@@ -410,7 +411,29 @@ class ScheduleController extends Controller
             $weekends = $this->getOnlyDays($objSchedule->getWeekends());
             $weekends[] = 'sunday';
             $data['weekends'] = $weekends;
-            return Excel::download(new ScheduleExport($data), 'schedule.xlsx');
+            $this->downloadScheduleExcel($data);
         }
 	}
+
+	public function downloadScheduleExcel($data)
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('B1', 'WEEK #' . $data['nb_week'] . ' ' . date('m/d/Y', strtotime($data['weeks'][$data['nb_week']]['week_start'])) . ' - ' . date('m/d/Y', strtotime($data['weeks'][$data['nb_week']]['week_end'])));
+        $sheet->mergeCells('B1:H1');
+        $week_dates = array();
+        foreach ($data['weekends'] as $key => $weekend) {
+            $week_dates[] = date('m/d/Y', strtotime($data['weeks'][$data['nb_week']]['week_start'] . '+'.$key.' days'));
+        }
+        $sheet->fromArray($data['weekends'], NULL, 'B2');
+        $sheet->fromArray($week_dates, NULL, 'B3');
+        $tmp_file = tempnam(sys_get_temp_dir(), 'Excel');
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($tmp_file);
+        $document = file_get_contents($tmp_file);
+        unlink($tmp_file);
+        header("Content-Disposition: attachment; filename= factura.xlsx");
+        header('Content-Type: application/excel');
+        echo $document;
+    }
 }
