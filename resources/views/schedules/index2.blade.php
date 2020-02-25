@@ -99,7 +99,7 @@
 						<div class="modal-body">
 						</div>
 						<div class="modal-footer">
-							<button data-id_week="{{$nb_week}}" class="btn btn-default download-schedule">Excel</button>
+							<button class="btn btn-default download-schedule">Excel</button>
 							<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 						</div>
 					</div>
@@ -116,9 +116,10 @@
 		});
 
 		$('.download-schedule').on('click', function (e) {
-			let id_week = $(e.target).data("id_week");
+			let id_week = $('.table-schedule').data("id_week");
 			let data = {};
 			data['id_week'] = id_week;
+			console.log(data);
 			$.ajax({
 				url: '/schedules/download-schedule',
 				method: 'POST',
@@ -157,7 +158,6 @@
 						let table = createScheduleTable(response);
 						$('.modal-body').append(table);
 						$('#modal-schedule').modal('show');
-//						window.location.href = '/schedules/download-schedule-excel';
 					} else {
 						alert(textStatus);
 					}
@@ -179,7 +179,7 @@
 			let week_end = data.week_end;
 			let block = '';
 			$.each(schedules, function (nb_week, employees) {
-				block += '<table id="W' + nb_week + '" class="table table-bordered">' +
+				block += '<table data-id_week="' + nb_week + '" class="table table-bordered table-schedule">' +
 					'<thread>' +
 					'<tr>' +
 					'<th rowspan="3"></th>' +

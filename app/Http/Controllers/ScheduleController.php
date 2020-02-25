@@ -419,7 +419,8 @@ class ScheduleController extends Controller
     {
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setCellValue('B1', 'WEEK #' . $data['nb_week'] . ' ' . date('m/d/Y', strtotime($data['weeks'][$data['nb_week']]['week_start'])) . ' - ' . date('m/d/Y', strtotime($data['weeks'][$data['nb_week']]['week_end'])));
+        $title = 'WEEK #' . $data['nb_week'] . ' ' . date('m/d/Y', strtotime($data['weeks'][$data['nb_week']]['week_start'])) . ' - ' . date('m/d/Y', strtotime($data['weeks'][$data['nb_week']]['week_end']));
+        $sheet->setCellValue('B1', $title);
         $sheet->mergeCells('B1:H1');
         $week_dates = array();
         foreach ($data['weekends'] as $key => $weekend) {
@@ -427,12 +428,26 @@ class ScheduleController extends Controller
         }
         $sheet->fromArray($data['weekends'], NULL, 'B2');
         $sheet->fromArray($week_dates, NULL, 'B3');
+        $row = 4;
+        foreach ($data['schedules'] as $nb_week => $employee) {
+            $col = 1;
+            $sheet->setCellValueByColumnAndRow($col, $row, $employee->last_name . ' ' . $employee->first_name);
+            $col++;
+            foreach ($data['weekends'] as $key => $weekend) {
+                if($weekend == 'sunday' || !$employee->$weekend) {
+                    $sheet->setCellValueByColumnAndRow($col + $key, $row, 0);
+                } else {
+                    $sheet->setCellValueByColumnAndRow($col + $key, $row, $employee->$weekend);
+                }
+            }
+            $row++;
+        }
         $tmp_file = tempnam(sys_get_temp_dir(), 'Excel');
         $writer = new Xlsx($spreadsheet);
         $writer->save($tmp_file);
         $document = file_get_contents($tmp_file);
         unlink($tmp_file);
-        header("Content-Disposition: attachment; filename= factura.xlsx");
+        header("Content-Disposition: attachment; filename= $title.xlsx");
         header('Content-Type: application/excel');
         echo $document;
     }
