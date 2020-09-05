@@ -44,7 +44,6 @@ class ScheduleController extends Controller
 		foreach ($tmp_weeks as $week) {
 			$weeks[$week] = $this->getStartAndEndDate($week, date('Y'));
 		}
-
 		$weekends = $this->getOnlyDays($objSchedule->getWeekends());
 		$weekends[] = 'sunday';
 
@@ -332,8 +331,8 @@ class ScheduleController extends Controller
 		}
 
 		// main loop with algorithm
-		foreach (range(1, $weeks_amount, 1) as $week) {
-			$nb_week = $week + $week_in_year;
+		for($i = 0; $i < $weeks_amount; $i++) {
+			$nb_week = $week_in_year + $i;
 			$week_dates = $this->getStartAndEndDate($nb_week, $date['year']);
 			// create for general employees
 			$is_general = true;
@@ -354,12 +353,13 @@ class ScheduleController extends Controller
         $date = array();
         $latest_date = Schedule::max('week_end');
         if (!empty($latest_date)) {
-            $date['start'] = date('Y-m-d', strtotime($latest_date));
-            $date['end'] = date('Y-m-d', strtotime($latest_date));
-            $date['year'] = date('Y', strtotime($latest_date));
+            $date['start'] = date('Y-m-d', strtotime($latest_date . "+7 day"));
+            $date['end'] = date('Y-m-d', strtotime($latest_date . "+7 day"));
+            $date['year'] = date('Y', strtotime($latest_date . "+7 day"));
         } else {
-            $date['start'] = date('Y-m-d', strtotime('Monday'));
-            $date['end'] = date('Y-m-d', strtotime('Sunday'));
+            $next_week = strtotime('next week');
+            $date['start'] = date("Y-m-d", strtotime('monday', $next_week));
+            $date['end'] = date("Y-m-d", strtotime('sunday', $next_week));
             $date['year'] = date('Y');
         }
         $excluded_employees = array();
@@ -378,12 +378,9 @@ class ScheduleController extends Controller
 	    if ($request->session()->has('nb_week')) {
             $nb_week = $request->session()->pull('nb_week');
         } else {
-            $nb_week = $_POST['id_week'];
+            $nb_week = $_GET['id_week'];
             $request->session()->put('nb_week', $nb_week);
         }
-        if (isset($_POST['id_week']) && !empty($_POST['id_week'])) {
-            return response()->json(null, 200);
-        } else {
             $objSchedule = new Schedule();
             $result = $objSchedule->getScheduleByWeek($nb_week);
             $teams = array();
@@ -400,10 +397,10 @@ class ScheduleController extends Controller
             $data['schedules'] = $schedules;
 
             // nb_week => [week_start, week_end]
-            $tmp_weeks = array_keys($data['schedules']);
+            $tmp_weeks = $data['schedules'];
             $weeks = array();
             foreach ($tmp_weeks as $week) {
-                $weeks[$week] = $this->getStartAndEndDate($week, date('Y'));
+                $weeks[$week->id_week] = $this->getStartAndEndDate($week->id_week, date('Y'));
             }
             $data['weeks'] = $weeks;
             $data['current_week'] = $this->getWeekNumber(date('m/d/Y'));
@@ -412,7 +409,6 @@ class ScheduleController extends Controller
             $weekends[] = 'sunday';
             $data['weekends'] = $weekends;
             $this->downloadScheduleExcel($data);
-        }
 	}
 
 	public function downloadScheduleExcel($data)
@@ -436,6 +432,7 @@ class ScheduleController extends Controller
             foreach ($data['weekends'] as $key => $weekend) {
                 if($weekend == 'sunday' || !$employee->$weekend) {
                     $sheet->setCellValueByColumnAndRow($col + $key, $row, 0);
+                    $sheet->getStyle($col + $key)->getFill()->getStartColor()->setARGB('FFFF0000');
                 } else {
                     $sheet->setCellValueByColumnAndRow($col + $key, $row, $employee->$weekend);
                 }

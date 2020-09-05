@@ -63,7 +63,7 @@
 
 					<div id="messages">
 						<p>
-                            Current WEEK #{{$current_week}} {{date('m/d/Y', strtotime($current_week_dates['week_start'])) . ' - ' . date('m/d/Y', strtotime($current_week_dates['week_start']))}}
+                            Current WEEK #{{$current_week}} {{date('m/d/Y', strtotime($current_week_dates['week_start'])) . ' - ' . date('m/d/Y', strtotime($current_week_dates['week_end']))}}
                         </p>
 					</div>
 
@@ -122,14 +122,14 @@
 			console.log(data);
 			$.ajax({
 				url: '/schedules/download-schedule',
-				method: 'POST',
+				method: 'GET',
 				data: data,
 				beforeSend: function () {
 					$('button').attr('disabled', true);
 				},
 				success: function (response, textStatus, xhr) {
 					if (xhr.status === 200) {
-						window.location.href = '/schedules/download-schedule';
+					    window.location.href = '/schedules/download-schedule' + '?id_week=' + id_week;
 					}
 				},
 				error: function (xhr, ajaxOptions, thrownError) {
