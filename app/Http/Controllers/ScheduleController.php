@@ -411,13 +411,46 @@ class ScheduleController extends Controller
             $this->downloadScheduleExcel($data);
 	}
 
+    function getNameFromNumber($num) {
+        $numeric = ($num - 1) % 26;
+        $letter = chr(65 + $numeric);
+        $num2 = intval(($num - 1) / 26);
+        if ($num2 > 0) {
+            return getNameFromNumber($num2) . $letter;
+        } else {
+            return $letter;
+        }
+    }
+
 	public function downloadScheduleExcel($data)
     {
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $title = 'WEEK #' . $data['nb_week'] . ' ' . date('m/d/Y', strtotime($data['weeks'][$data['nb_week']]['week_start'])) . ' - ' . date('m/d/Y', strtotime($data['weeks'][$data['nb_week']]['week_end']));
+        $sheet->getStyle('A:H')->getFont()->setName('Calibri')->setSize('14');
         $sheet->setCellValue('B1', $title);
+        $styleArray = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN //fine border
+                ]
+            ]
+        ];
+
+        $sheet->getStyle('A1:H' . (3 + count($data['schedules'])))->applyFromArray($styleArray);
         $sheet->mergeCells('B1:H1');
+        $sheet->mergeCells('A1:A3');
+        $sheet->getStyle('B:H')->getAlignment()->setHorizontal('center');
+        $sheet->getStyle('B1')->getAlignment()->setHorizontal('center');
+        $sheet->getStyle('B1')->getFont()->setBold(true);
+        $sheet->getColumnDimension('A')->setAutoSize(true);
+        $styleArray = array(
+            'borders' => array(
+                'outline' => array(
+                    'style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THICK,
+                ),
+            ),
+        );
         $week_dates = array();
         foreach ($data['weekends'] as $key => $weekend) {
             $week_dates[] = date('m/d/Y', strtotime($data['weeks'][$data['nb_week']]['week_start'] . '+'.$key.' days'));
@@ -430,11 +463,21 @@ class ScheduleController extends Controller
             $sheet->setCellValueByColumnAndRow($col, $row, $employee->last_name . ' ' . $employee->first_name);
             $col++;
             foreach ($data['weekends'] as $key => $weekend) {
+                $letter = $this->getNameFromNumber($col + $key);
+                $sheet->getColumnDimension($letter)->setAutoSize(true);
                 if($weekend == 'sunday' || !$employee->$weekend) {
-                    $sheet->setCellValueByColumnAndRow($col + $key, $row, 0);
-                    $sheet->getStyle($col + $key)->getFill()->getStartColor()->setARGB('FFFF0000');
+                    // set number
+                    //$sheet->setCellValueByColumnAndRow($col + $key, $row, 0);
+
+                    // set color
+                    $sheet->getStyle($letter. $row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFC000');
                 } else {
-                    $sheet->setCellValueByColumnAndRow($col + $key, $row, $employee->$weekend);
+                    // set number
+                    // $sheet->setCellValueByColumnAndRow($col + $key, $row, $employee->$weekend);
+
+                    $sheet->setCellValueByColumnAndRow($col + $key, $row, 'OFF');
+                    // set color
+                    $sheet->getStyle($letter. $row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF00');
                 }
             }
             $row++;
