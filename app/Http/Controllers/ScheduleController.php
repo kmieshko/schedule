@@ -113,7 +113,7 @@ class ScheduleController extends Controller
         $employees = $objEmployee->getAllEmployeesWithDepartments();
         $data['employees'] = $employees;
         $data['latest_week'] = Schedule::max('id_week');
-        $dates = Schedule::select('week_start', 'week_end')->where('id_week', '=', $data['latest_week'])->limit(1)->get();
+        $dates = Schedule::select('week_start', 'week_end')->where('id_week', '=', $data['latest_week'])->limit(1)->orderBy('id', 'desc')->get();
         $week_start = isset($dates[0]) ? date('m/d/Y', strtotime($dates[0]['week_start'])) : '';
         $week_end = isset($dates[0]) ? date('m/d/Y', strtotime($dates[0]['week_end'])) : '';
         $data['week_start'] = $week_start;
