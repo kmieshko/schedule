@@ -202,14 +202,19 @@
 				block += '</tr>' +
 					'</thread>';
 				$.each(employees, function (id_employee, employee) {
-					block += '<tr id="' + employee[id_employee] + '">' +
+					block += '<tr>' +
 						'<td class="employee-name w-12">' + employee.last_name + ' ' + employee.first_name + '</td>';
 					$.each(weekends, function (key, weekend) {
-						block += '<td class="weekend ' + weekend;
+                        edit_schedule[id_employee]={};
+					    block += '<td data-id_employee="' + employee.id_employee + '" data-weekend_name="'+ weekend + '"';
+						block += 'class="weekend';
 						if (employee[weekend] === 1) {
-							block += ' bg-yellow';
-						}
-						block += '"></td>';
+							block += ' bg-yellow"';
+							block += ' data-is_weekend="1"'
+						} else {
+                            block += '" data-is_weekend="0"'
+                        }
+						block += '></td>';
 					});
 					block += '</tr>';
 				});
@@ -217,5 +222,30 @@
 			});
 			return block;
 		}
+
+		$('.weekend').on('click', function (e) {
+		    console.log(e.target);
+        });
+
+        let edit_schedule = {};
+        $(document).on('click', '.weekend' , function(e) {
+            $(e.target).data('is_weekend',  $(e.target).data('is_weekend') === 1 ? 0 : 1);
+            let data = $(e.target).data();
+            let weekend_name = data.weekend_name;
+            let id_employee = data.id_employee;
+            let is_weekend = data.is_weekend;
+            if (is_weekend) {
+                $(e.target).addClass('bg-yellow');
+            } else {
+                $(e.target).removeClass('bg-yellow');
+            }
+            if (typeof edit_schedule[id_employee][weekend_name] != 'undefined') {
+                delete edit_schedule[id_employee][weekend_name];
+            } else {
+                edit_schedule[id_employee][weekend_name]=is_weekend;
+            }
+            // POST for editing in DB
+            console.log(edit_schedule);
+        });
 	</script>
 @endsection
