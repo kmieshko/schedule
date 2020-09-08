@@ -194,7 +194,9 @@
 				block += '</tr>' +
 					'<tr>';
 				$.each(weekends, function (key, weekend) {
-					let date = new Date(weeks[nb_week].week_start);
+					let tmp_date = new Date(weeks[nb_week].week_start);
+                    let userTimezoneOffset = tmp_date.getTimezoneOffset() * 60000;
+                    let date = new Date(tmp_date.getTime() + userTimezoneOffset);
 					date.setDate(date.getDate() + parseInt(key));
 					date = $.format.date(date, "MM/dd/yyyy");
 					block += '<td class="w-7 weekend-name text-center text-capitalize">' + date + '</td>';

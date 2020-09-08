@@ -112,8 +112,9 @@ class ScheduleController extends Controller
         $objEmployee = new Employee();
         $employees = $objEmployee->getAllEmployeesWithDepartments();
         $data['employees'] = $employees;
-        $data['latest_week'] = Schedule::max('id_week');
-        $dates = Schedule::select('week_start', 'week_end')->where('id_week', '=', $data['latest_week'])->limit(1)->orderBy('id', 'desc')->get();
+        $latest_week = Schedule::select('id_week')->orderBy('id', 'desc')->limit(1)->get();
+        $data['latest_week'] = isset($latest_week[0]) ? $latest_week[0]['id_week'] : '';
+        $dates = Schedule::select('week_start', 'week_end')->where('id_week', '=', $data['latest_week'])->limit(1)->get();
         $week_start = isset($dates[0]) ? date('m/d/Y', strtotime($dates[0]['week_start'])) : '';
         $week_end = isset($dates[0]) ? date('m/d/Y', strtotime($dates[0]['week_end'])) : '';
         $data['week_start'] = $week_start;
@@ -319,11 +320,11 @@ class ScheduleController extends Controller
         // sorting by a team without any conditions, because non general employees haven't managers in team
         // and removing excluded workers
         $other_employees = $this->sortNonGeneralEmployees($other_employees, $excluded_employees);
-        $week_in_year = $this->getWeekNumber($date['start']);
 
 		// if it's not a first scheduling - check last day and shifting weekends
-		$latest_week = Schedule::max('id_week');
-		if (!empty($latest_week)) {
+		$latest_week = Schedule::select('id_week')->orderBy('id', 'desc')->limit(1)->get();
+		if (isset($latest_week[0])) {
+            $latest_week = $latest_week[0]['id_week'];
 			$latest_day_for_general = array_search ('1', (array)$objSchedule->getLatestDayForGeneral($latest_week));
 			$latest_day_for_non_general = array_search ('1', (array)$objSchedule->getLatestDayForNonGeneral($latest_week));
 			$this->shiftWeekends($weekends1, $latest_day_for_general);
@@ -332,7 +333,8 @@ class ScheduleController extends Controller
 
 		// main loop with algorithm
 		for($i = 0; $i < $weeks_amount; $i++) {
-			$nb_week = $week_in_year + $i;
+            $week_in_year = $this->getWeekNumber($date['start']);
+			$nb_week = $this->getWeekNumber($date['start'] . "+" . 7 * $i ." day");
 			$week_dates = $this->getStartAndEndDate($nb_week, $date['year']);
 			// create for general employees
 			$is_general = true;
@@ -351,8 +353,9 @@ class ScheduleController extends Controller
             $weeks_amount = $weeks_amount < 1 ? 1 : $weeks_amount;
         }
         $date = array();
-        $latest_date = Schedule::max('week_end');
-        if (!empty($latest_date)) {
+        $latest_date = Schedule::select('week_end')->orderBy('id', 'desc')->limit(1)->get();
+        if (isset($latest_date[0])) {
+            $latest_date = $latest_date[0]['week_end'];
             $date['start'] = date('Y-m-d', strtotime($latest_date . "+7 day"));
             $date['end'] = date('Y-m-d', strtotime($latest_date . "+7 day"));
             $date['year'] = date('Y', strtotime($latest_date . "+7 day"));
@@ -367,9 +370,10 @@ class ScheduleController extends Controller
             $excluded_employees = $_POST['employees'];
         }
         $this->createSchedule($date, $weeks_amount, $excluded_employees);
-        $data['week_end'] = date('m/d/Y', strtotime(Schedule::max('week_end')));
-        $data['week_start'] = date('m/d/Y', strtotime(Schedule::max('week_start')));
-        $data['latest_week'] = Schedule::max('id_week');
+        $data['week_end'] = date('m/d/Y', strtotime(Schedule::select('week_end')->orderBy('id', 'desc')->limit(1)->get()[0]['week_end']));
+        $data['week_start'] = date('m/d/Y', strtotime(Schedule::select('week_start')->orderBy('id', 'desc')->limit(1)->get()[0]['week_start']));
+        $latest_week = Schedule::select('id_week')->orderBy('id', 'desc')->limit(1)->get();
+        $data['latest_week'] = isset($latest_week[0]) ? $latest_week[0]['id_week'] : '';
         return response()->json(array('data'=> $data), 200);
     }
 
