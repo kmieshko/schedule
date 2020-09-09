@@ -207,13 +207,20 @@ class ScheduleController extends Controller
                     }
                     if (!$is_saturday_busy || $key % $period == $tmp_key) { // if current Saturday is available
                     //if (!$is_saturday_busy) { // if current Saturday is available
+
                         // check latest 2 team weeks
-//                        $check_nb_week = Schedule::select('id_week', 'week_start')->where('nb_team', '=', $employee['nb_team'])->orderBy('id', 'desc')->orderBy('id_employee', 'asc')->limit(1)->get();
-//                        $last_saturday = isset($check_nb_week[0]) ? $objSchedule->checkWeekendByTeam($check_nb_week[0]['id_week'], $employee['nb_team']) : '';
-//                        $check_nb_week2 = isset($check_nb_week[0]) ? Schedule::select('id_week', 'week_start')->where('nb_team', '=', $employee['nb_team'])->where('week_start', '<', $check_nb_week[0]['week_start'])->orderBy('id', 'desc')->orderBy('id_employee', 'asc')->limit(1)->get() : '';
-//                        $before_last_saturday = isset($check_nb_week2[0]) ? $objSchedule->checkWeekendByTeam($check_nb_week2[0]['id_week'], $employee['nb_team']) : '';
-                        $last_saturday = $objSchedule->checkWeekendByTeam($nb_week - 1, $employee['nb_team']);
-                        $before_last_saturday = $objSchedule->checkWeekendByTeam($nb_week - 2, $employee['nb_team']);
+
+                        //get previous week if it exist
+                        $check_nb_week = Schedule::select('id_week', 'week_start')->where('nb_team', '=', $employee['nb_team'])->where('week_start', '<', $week_dates['week_start'])->orderBy('id', 'desc')->orderBy('id_employee', 'asc')->limit(1)->get();
+
+                        // check last saturday
+                        $last_saturday = isset($check_nb_week[0]) ? $objSchedule->checkWeekendByTeam($check_nb_week[0]['id_week'], $employee['nb_team']) : [];
+
+                        // check week before last if exist previous week
+                        $check_nb_week2 = isset($check_nb_week[0]) ? Schedule::select('id_week', 'week_start')->where('nb_team', '=', $employee['nb_team'])->where('week_start', '<', $check_nb_week[0]['week_start'])->orderBy('id', 'desc')->orderBy('id_employee', 'asc')->limit(1)->get() : [];
+
+                        // check saturday of week before last if week before last exist
+                        $before_last_saturday = isset($check_nb_week2[0]) ? $objSchedule->checkWeekendByTeam($check_nb_week2[0]['id_week'], $employee['nb_team']) : [];
                         if ((empty($last_saturday) || !$last_saturday->saturday) &&
                             (empty($before_last_saturday) || !$before_last_saturday->saturday)) { // if team hadn't Saturday in latest 2 weeks - weekend is Saturday
                             $insert_data = array(
