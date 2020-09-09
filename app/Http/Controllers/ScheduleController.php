@@ -39,11 +39,13 @@ class ScheduleController extends Controller
 		$data['schedules'] = $this->sortSchedules($schedules);
 
 		// nb_week => [week_start, week_end]
-		$tmp_weeks = array_keys($data['schedules']);
+		$tmp_weeks = $data['schedules'];
 		$weeks = array();
-		foreach ($tmp_weeks as $week) {
-			$weeks[$week] = $this->getStartAndEndDate($week, date('Y'));
-		}
+        foreach ($tmp_weeks as $id_week => $week) {
+            foreach ($week as $id_employee => $data_employee) {
+                $weeks[$id_week] = $this->getStartAndEndDate($id_week, date('Y', strtotime($data_employee['week_start'])));
+            }
+        }
 		$weekends = $this->getOnlyDays($objSchedule->getWeekends());
 		$weekends[] = 'sunday';
 
@@ -64,15 +66,15 @@ class ScheduleController extends Controller
 		$tmp_schedules = $objSchedule->getAllWeeksSchedules();
 		$schedules = array();
 		foreach ($tmp_schedules as $item) {
-			$schedules[$item->id_week] = $item->id_week;
+			$schedules[$item->id_week] = $item;
 		}
 		$data['schedules'] = $schedules;
 
 		// nb_week => [week_start, week_end]
-		$tmp_weeks = array_keys($data['schedules']);
+		$tmp_weeks = $data['schedules'];
 		$weeks = array();
 		foreach ($tmp_weeks as $week) {
-			$weeks[$week] = $this->getStartAndEndDate($week, date('Y'));
+			$weeks[$week->id_week] = $this->getStartAndEndDate($week->id_week, date('Y', strtotime($week->week_start)));
 		}
 		$data['weeks'] = $weeks;
 		$data['current_week'] = $this->getWeekNumber(date('m/d/Y'));
@@ -88,10 +90,12 @@ class ScheduleController extends Controller
 		$data['schedules'] = $this->sortSchedules($schedules);
 
 		// nb_week => [week_start, week_end]
-		$tmp_weeks = array_keys($data['schedules']);
+		$tmp_weeks = $data['schedules'];
 		$weeks = array();
-		foreach ($tmp_weeks as $week) {
-			$weeks[$week] = $this->getStartAndEndDate($week, date('Y'));
+		foreach ($tmp_weeks as $id_week => $week) {
+		    foreach ($week as $id_employee => $data_employee) {
+                $weeks[$id_week] = $this->getStartAndEndDate($id_week, date('Y', strtotime($data_employee['week_start'])));
+            }
 		}
 
 		$weekends = $this->getOnlyDays($objSchedule->getWeekends());
@@ -146,6 +150,8 @@ class ScheduleController extends Controller
                     $data[$schedule->id_week][$schedule->id_employee][$weekend] = $schedule->$weekend;
                 }
                 $data[$schedule->id_week][$schedule->id_employee]['sunday'] = 1;
+                $data[$schedule->id_week][$schedule->id_employee]['week_start'] = $schedule->week_start;
+                $data[$schedule->id_week][$schedule->id_employee]['week_end'] = $schedule->week_end;
             }
 		}
 		return $data;
@@ -200,7 +206,12 @@ class ScheduleController extends Controller
 						$is_saturday_busy = $objSchedule->checkWeekendByDayForNonGeneral($nb_week, 'saturday');
                     }
                     if (!$is_saturday_busy || $key % $period == $tmp_key) { // if current Saturday is available
+                    //if (!$is_saturday_busy) { // if current Saturday is available
                         // check latest 2 team weeks
+//                        $check_nb_week = Schedule::select('id_week', 'week_start')->where('nb_team', '=', $employee['nb_team'])->orderBy('id', 'desc')->orderBy('id_employee', 'asc')->limit(1)->get();
+//                        $last_saturday = isset($check_nb_week[0]) ? $objSchedule->checkWeekendByTeam($check_nb_week[0]['id_week'], $employee['nb_team']) : '';
+//                        $check_nb_week2 = isset($check_nb_week[0]) ? Schedule::select('id_week', 'week_start')->where('nb_team', '=', $employee['nb_team'])->where('week_start', '<', $check_nb_week[0]['week_start'])->orderBy('id', 'desc')->orderBy('id_employee', 'asc')->limit(1)->get() : '';
+//                        $before_last_saturday = isset($check_nb_week2[0]) ? $objSchedule->checkWeekendByTeam($check_nb_week2[0]['id_week'], $employee['nb_team']) : '';
                         $last_saturday = $objSchedule->checkWeekendByTeam($nb_week - 1, $employee['nb_team']);
                         $before_last_saturday = $objSchedule->checkWeekendByTeam($nb_week - 2, $employee['nb_team']);
                         if ((empty($last_saturday) || !$last_saturday->saturday) &&
@@ -334,8 +345,10 @@ class ScheduleController extends Controller
 		// main loop with algorithm
 		for($i = 0; $i < $weeks_amount; $i++) {
             $week_in_year = $this->getWeekNumber($date['start']);
-			$nb_week = $this->getWeekNumber($date['start'] . "+" . 7 * $i ." day");
-			$week_dates = $this->getStartAndEndDate($nb_week, $date['year']);
+            $formatStartDate = $date['start'] . "+" . 7 * $i ." day";
+            $formatEndDate = $date['end'] . "+" . 7 * $i ." day";
+			$nb_week = $this->getWeekNumber($formatStartDate);
+			$week_dates = $this->getStartAndEndDate($nb_week, date('Y', strtotime($formatStartDate)));
 			// create for general employees
 			$is_general = true;
             $this->createScheduleAlgorithm($general_employees, $nb_week, $week_dates, $is_general, $weekends1);
@@ -356,7 +369,7 @@ class ScheduleController extends Controller
         $latest_date = Schedule::select('week_end')->orderBy('id', 'desc')->limit(1)->get();
         if (isset($latest_date[0])) {
             $latest_date = $latest_date[0]['week_end'];
-            $date['start'] = date('Y-m-d', strtotime($latest_date . "+7 day"));
+            $date['start'] = date('Y-m-d', strtotime($latest_date . "+1 day"));
             $date['end'] = date('Y-m-d', strtotime($latest_date . "+7 day"));
             $date['year'] = date('Y', strtotime($latest_date . "+7 day"));
         } else {
@@ -404,7 +417,7 @@ class ScheduleController extends Controller
             $tmp_weeks = $data['schedules'];
             $weeks = array();
             foreach ($tmp_weeks as $week) {
-                $weeks[$week->id_week] = $this->getStartAndEndDate($week->id_week, date('Y'));
+                $weeks[$week->id_week] = $this->getStartAndEndDate($week->id_week, date('Y', strtotime($week->week_start)));
             }
             $data['weeks'] = $weeks;
             $data['current_week'] = $this->getWeekNumber(date('m/d/Y'));

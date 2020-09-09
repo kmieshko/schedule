@@ -31,6 +31,7 @@ class Employee extends Model
     {
         $data = DB::table('employees')
             ->where('is_manager', '=', 1)
+            ->where('id_department', '=', 1)
             ->get()
             ->toArray();
         return $data;
@@ -40,6 +41,7 @@ class Employee extends Model
     {
         $data = DB::table('employees')
             ->where('is_manager', '=', 0)
+            ->where('id_department', '=', 1)
             ->get()
             ->toArray();
         return $data;

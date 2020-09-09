@@ -18,7 +18,7 @@ class Schedule extends Model
 	public function getAllWeeksSchedules()
 	{
 		$data = DB::table("schedules")
-			->select('id_week')
+			->select('id_week', 'week_start', 'week_end')
 			->distinct()
 			->get()
 			->toArray();
@@ -109,6 +109,8 @@ class Schedule extends Model
 			['id_week', '=', $nb_week],
 			['nb_team', '=', $nb_team],
 		])
+            ->orderBy('id', 'desc')
+            ->limit(1)
 			->get()
 			->toArray();
 		return !empty($result) ? $result[0] : array();
