@@ -99,6 +99,7 @@
 						<div class="modal-body">
 						</div>
 						<div class="modal-footer">
+                            <button class="btn btn-success save-changes">Save</button>
 							<button class="btn btn-default download-schedule">Excel</button>
 							<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 						</div>
@@ -248,6 +249,40 @@
             }
             // POST for editing in DB
             console.log(edit_schedule);
+
+
+            // $.each(edit_schedule, function (key1, id_empl) {
+            //     $.each(id_empl, function(key2, weekend_na) {
+            //         if (weekend_na)
+            //             flag = 1;
+            //     })
+            // });
         });
+
+        $('.save-changes').on('click', function () {
+            let id_week = $('.table-schedule').data("id_week");
+            $.ajax({
+                url: '/schedules/save-changes',
+                method: 'POST',
+                data: {schedule: edit_schedule, id_week: id_week},
+                beforeSend: function () {
+                    $('.weekend').attr('disabled', true);
+                },
+                success: function (response, textStatus, xhr) {
+                    if (xhr.status === 200) {
+                        alert('Changes was saved');
+                        console.log('Changes was saved');
+                    } else {
+                        alert(textStatus);
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert(thrownError);
+                },
+                complete: function () {
+                    $('.weekend').attr('disabled', false);
+                }
+            })
+        })
 	</script>
 @endsection

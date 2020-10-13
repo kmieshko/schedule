@@ -515,4 +515,15 @@ class ScheduleController extends Controller
         header('Content-Type: application/excel');
         echo $document;
     }
+
+
+    public function ajaxSaveChanges()
+    {
+        if (!empty($_POST)) {
+            $objSchedule = new Schedule();
+            $objSchedule->saveChanges($_POST['schedule'], $_POST['id_week']);
+            return response()->json(array(), 200);
+        }
+        return response()->json(array(), 404);
+    }
 }

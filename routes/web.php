@@ -22,3 +22,5 @@ Route::post('/schedules/schedule-by-week', 'ScheduleController@ajaxScheduleByWee
 Route::get('/schedules/create', 'ScheduleController@create');
 Route::post('/schedules/create-schedule', 'ScheduleController@ajaxCreateSchedule');
 Route::get('/schedules/download-schedule', 'ScheduleController@ajaxDownloadSchedule');
+Route::post('/schedules/save-changes', 'ScheduleController@ajaxSaveChanges');
+

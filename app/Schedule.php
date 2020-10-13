@@ -154,4 +154,14 @@ class Schedule extends Model
 			->toArray();
 		return $result;
 	}
+
+	public function saveChanges($data, $id_week)
+    {
+        foreach ($data as $id_employee => $array) {
+            DB::table('schedules')
+                    ->where('id_employee', $id_employee)
+                    ->where('id_week', $id_week)
+                    ->update($array);
+        }
+    }
 }
