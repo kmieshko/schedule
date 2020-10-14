@@ -262,6 +262,7 @@
                 },
                 success: function (response, textStatus, xhr) {
                     if (xhr.status === 200) {
+                        edit_schedule = {};
                         alert('Changes was saved');
                         console.log('Changes was saved');
                     } else {
