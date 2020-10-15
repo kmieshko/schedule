@@ -524,6 +524,5 @@ class ScheduleController extends Controller
             $objSchedule->saveChanges($_POST['schedule'], $_POST['id_week']);
             return response()->json(array(), 200);
         }
-        return response()->json(array(), 404);
     }
 }
