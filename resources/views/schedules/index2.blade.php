@@ -261,10 +261,13 @@
                     $('.weekend').attr('disabled', true);
                 },
                 success: function (response, textStatus, xhr) {
+                    edit_schedule = {};
                     if (xhr.status === 200) {
-                        edit_schedule = {};
                         alert('Changes was saved');
                         console.log('Changes was saved');
+                    } else {
+                        alert('Everything is up to date');
+                        console.log('Everything is up to date');
                     }
                 },
                 error: function (xhr, ajaxOptions, thrownError) {

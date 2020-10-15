@@ -519,10 +519,11 @@ class ScheduleController extends Controller
 
     public function ajaxSaveChanges()
     {
-        if (!empty($_POST)) {
+        if (!empty($_POST) && isset($_POST['schedule'])) {
             $objSchedule = new Schedule();
             $objSchedule->saveChanges($_POST['schedule'], $_POST['id_week']);
             return response()->json(array(), 200);
         }
+        return response()->json(array(), 204);
     }
 }
