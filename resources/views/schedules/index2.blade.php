@@ -36,14 +36,9 @@
             border-top: solid rgb(129, 132, 150) 2px !important;
             border-bottom: solid rgb(129, 132, 150) 2px !important;
         }
-		.modal-dialog {
+		.modal-body {
 			overflow: auto !important;
 		}
-
-        .modal-content {
-            width: 800px;
-        }
-
     </style>
 
     <div class="content-wrapper">
