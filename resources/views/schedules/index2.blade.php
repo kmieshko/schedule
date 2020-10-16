@@ -3,9 +3,6 @@
         .w-7 {
             width: 7%;
         }
-        .w-12 {
-            width: 12%;
-        }
         .p-5 {
             padding: 5px;
         }
@@ -36,9 +33,73 @@
             border-top: solid rgb(129, 132, 150) 2px !important;
             border-bottom: solid rgb(129, 132, 150) 2px !important;
         }
-		.modal-body {
-			overflow: auto !important;
-		}
+
+        .table-scroll {
+            overflow: auto;
+        }
+
+        thead td {
+            position: -webkit-sticky; /* for Safari */
+            position: sticky;
+            top: 0;
+            left: 1% !important;
+        }
+        tbody td:first-child {
+            position: -webkit-sticky; /* for Safari */
+            position: sticky;
+            left: 0 !important;
+        }
+
+
+        /* To have the header in the first column stick to the left: */
+
+        thead .empty-cell {
+            left: 0 !important;
+        }
+
+        /* Just to display it nicely: */
+
+        thead td {
+            background: #000;
+            color: #FFF;
+            /* Ensure this stays above the emulated border right in tbody th {}: */
+            z-index: 1;
+        }
+
+        tbody .employee-name, .empty-cell {
+            z-index: 2;
+            background: #FFF;
+            border-right: 1px solid #CCC !important;
+            border-left: 1px solid #CCC !important;
+            /* Browsers tend to drop borders on sticky elements, so we emulate the border-right using a box-shadow to ensure it stays: */
+            box-shadow: 1px 0 0 0 #ccc, -1px 0 0 0 #ccc;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        td,
+        th {
+            padding: 0.5em;
+        }
+
+        body .modal-dialog { /* Width */
+            max-width: 100%;
+            width: auto !important;
+            display: inline-block;
+        }
+
+        .modal {
+            z-index: -1;
+            display: flex !important;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-open .modal {
+            z-index: 1050;
+        }
     </style>
 
     <div class="content-wrapper">
@@ -89,7 +150,7 @@
 
 			<!-- Modal -->
 			<div class="modal fade" id="modal-schedule" tabindex="-1" role="dialog">
-				<div class="modal-dialog">
+				<div class="modal-dialog center">
 					<div class="modal-content">
 						<div class="modal-header">
 							<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -114,6 +175,7 @@
 			$("#mainScheduleNav").addClass('active');
 			$("#viewScheduleNav").addClass('active');
 		});
+
 
 		$('.download-schedule').on('click', function (e) {
 			let id_week = $('.table-schedule').data("id_week");
@@ -157,6 +219,12 @@
 					if (xhr.status === 200) {
 						let table = createScheduleTable(response);
 						$('.modal-body').append(table);
+                        $('.modal-body').css({
+                            width:'auto', //probably not needed
+                            height:'auto', //probably not needed
+                            'max-height':'100%'
+                        });
+                        console.log('modal on');
 						$('#modal-schedule').modal('show');
 					} else {
 						alert(textStatus);
@@ -179,20 +247,20 @@
 			let week_end = data.week_end;
 			let block = '';
 			$.each(schedules, function (nb_week, employees) {
-				block += '<table data-id_week="' + nb_week + '" class="table table-bordered table-schedule">' +
+				block += '<div class="table-scroll"><table data-id_week="' + nb_week + '" class="table table-bordered table-schedule">' +
 					'<thread>' +
 					'<tr>' +
-					'<th rowspan="3"></th>' +
+                    '<td class="empty-cell"></td>' +
 					'<th  colspan="7" class="text-center">' +
 					'WEEK #' + nb_week + ' ' + week_start + ' - ' + week_end + '' +
 					'</th>' +
 					'</tr>' +
-					'<tr>';
+					'<tr><td class="empty-cell"></td>';
 				$.each(weekends, function (key, weekend) {
 					block += '<td class="w-7 weekend-name text-center text-capitalize">' + weekend + '</td>';
 				});
 				block += '</tr>' +
-					'<tr>';
+					'<tr><td class="empty-cell"></td>';
 				$.each(weekends, function (key, weekend) {
 					let tmp_date = new Date(weeks[nb_week].week_start);
                     let userTimezoneOffset = tmp_date.getTimezoneOffset() * 60000;
@@ -202,10 +270,10 @@
 					block += '<td class="w-7 weekend-name text-center text-capitalize">' + date + '</td>';
 				});
 				block += '</tr>' +
-					'</thread>';
+					'</thread><tbody>';
 				$.each(employees, function (id_employee, employee) {
 					block += '<tr>' +
-						'<td class="employee-name w-12">' + employee.last_name + ' ' + employee.first_name + '</td>';
+						'<td class="employee-name">' + employee.last_name + ' ' + employee.first_name + '</td>';
 					$.each(weekends, function (key, weekend) {
                         edit_schedule[id_employee]={};
 					    block += '<td data-id_employee="' + employee.id_employee + '" data-weekend_name="'+ weekend + '"';
@@ -220,7 +288,7 @@
 					});
 					block += '</tr>';
 				});
-				block += '</table>';
+				block += '</tbody></table></div>';
 			});
 			return block;
 		}
