@@ -2,9 +2,12 @@
     <!-- Logo -->
     <a href="/" class="logo">
       <!-- mini logo for sidebar mini 50x50 pixels -->
-      <span class="logo-mini"><b>ADN</b></span>
+      <span class="logo-mini"><b>GRR</b></span>
       <!-- logo for regular state and mobile devices -->
-      <span class="logo-lg"><b>Admin</b></span>
+      <span class="logo-lg">
+          <img src="/public/images/logo.png" alt="Logo">
+{{--          <b>GRR Cooling</b>--}}
+      </span>
     </a>
     <!-- Header Navbar: style can be found in header.less -->
     <nav class="navbar navbar-static-top p-0">
@@ -16,4 +19,3 @@
     </nav>
   </header>
   <!-- Left side column. contains the logo and sidebar -->
-  
