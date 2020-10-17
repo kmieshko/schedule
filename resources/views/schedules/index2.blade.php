@@ -174,9 +174,6 @@
 		$(document).ready(function() {
 			$("#mainScheduleNav").addClass('active');
 			$("#viewScheduleNav").addClass('active');
-			if ($(window).width() < 801) {
-                $(".modal-dialog").css({ top: '60px' });
-            }
 		});
 
 
