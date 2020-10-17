@@ -100,6 +100,10 @@
         .modal-open .modal {
             z-index: 1050;
         }
+
+        .modal-dialog {
+            top: 10%;
+        }
     </style>
 
     <div class="content-wrapper">
