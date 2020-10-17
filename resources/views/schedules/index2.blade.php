@@ -100,10 +100,6 @@
         .modal-open .modal {
             z-index: 1050;
         }
-
-        .modal-dialog {
-            top: 10%;
-        }
     </style>
 
     <div class="content-wrapper">
@@ -178,6 +174,9 @@
 		$(document).ready(function() {
 			$("#mainScheduleNav").addClass('active');
 			$("#viewScheduleNav").addClass('active');
+			if ($(window).width() < 801) {
+                $(".modal-dialog").css({ top: '60px' });
+            }
 		});
 
 
