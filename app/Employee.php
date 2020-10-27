@@ -94,4 +94,11 @@ class Employee extends Model
             ->toArray();
         return $data;
     }
+
+    public function deleteEmployee($id_employee)
+    {
+        $data = DB::table('employees')
+            ->where('id', '=', $id_employee)
+            ->delete();
+    }
 }

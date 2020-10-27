@@ -23,4 +23,5 @@ Route::get('/schedules/create', 'ScheduleController@create');
 Route::post('/schedules/create-schedule', 'ScheduleController@ajaxCreateSchedule');
 Route::get('/schedules/download-schedule', 'ScheduleController@ajaxDownloadSchedule');
 Route::post('/schedules/save-changes', 'ScheduleController@ajaxSaveChanges');
-
+Route::get('/employee', 'EmployeeController@index');
+Route::post('/employee/delete-employee', 'EmployeeController@ajaxDeleteEmployee');
