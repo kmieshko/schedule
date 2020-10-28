@@ -97,8 +97,47 @@ class Employee extends Model
 
     public function deleteEmployee($id_employee)
     {
-        $data = DB::table('employees')
+        DB::table('employees')
             ->where('id', '=', $id_employee)
             ->delete();
+    }
+
+    public function getEmployeeById($id_employee)
+    {
+        $data = DB::table('employees')
+            ->where('id', '=', $id_employee)
+            ->get()
+            ->toArray();
+        return !empty($data) ? (array)$data[0] : array();
+    }
+
+    public function getEmployeeByTeam($nb_team)
+    {
+        $data = DB::table('employees')
+            ->where('nb_team', '=', $nb_team)
+            ->get()
+            ->toArray();
+        return $data;
+    }
+
+    public function setAsManagerById($id_employee)
+    {
+        $data = DB::table('employees')
+            ->where('id', '=', $id_employee)
+            ->update(['is_manager' => 1]);
+        return $data;
+    }
+
+    public function getDepartments()
+    {
+        $data = DB::table('departments')
+            ->get()
+            ->toArray();
+        return $data;
+    }
+
+    public function createEmployee($data)
+    {
+        DB::table('employees')->insert($data);
     }
 }

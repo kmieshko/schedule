@@ -164,4 +164,11 @@ class Schedule extends Model
                     ->update($array);
         }
     }
+
+    public function deleteScheduleByEmployeeId($id_employee)
+    {
+        DB::table('schedules')
+            ->where('id_employee', '=', $id_employee)
+            ->delete();
+    }
 }

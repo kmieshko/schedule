@@ -19,17 +19,21 @@
         .bg-purple {
             white-space: normal !important;
         }
+        .small-image {
+            height: 64px;
+            width: 64px;
+        }
     </style>
     <div class="content-wrapper">
         <!-- Content Header (Page header) -->
         <section class="content-header">
             <h1>
-                Create
-                <small>Schedule</small>
+                View
+                <small>Employees</small>
             </h1>
             <ol class="breadcrumb">
                 <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-                <li class="active">Schedule</li>
+                <li class="active">View Employees</li>
             </ol>
         </section>
 
@@ -37,7 +41,7 @@
         <section class="content">
             <!-- Small boxes (Stat box) -->
             <div class="row">
-                <div class="col-md-12">
+                <div class="col-md-10 col-md-offset-1">
                     <div class="box box-purple p-5">
                         <div class="box-header">
                             <h3 class="box-title">Employees</h3>
@@ -48,10 +52,12 @@
                                 <thead>
                                 <tr>
                                     <th data-sortable="true">#</th>
+                                    <th class="text-center">Photo</th>
                                     <th data-sortable="true">Name</th>
                                     <th data-sortable="true">Post</th>
                                     <th data-sortable="true">Team</th>
                                     <th data-sortable="true">Department</th>
+                                    <th data-sortable="true">Position</th>
                                     <th data-sortable="true" class="text-center">Change</th>
                                     <th class="text-center" data-sortable="true">Delete</th>
                                 </tr>
@@ -59,6 +65,13 @@
                                 @foreach($employees as $key => $employee)
                                     <tr data-id="{{$employee->id}}" class="employee">
                                         <td>{{$key + 1}}</td>
+                                        <td class="text-center">
+                                            @if($employee->image)
+                                            <img class="small-image" src="/public/images/{{$employee->image}}" alt="{{$employee->last_name . ' ' . $employee->first_name}}">
+                                            @else
+                                                <img class="small-image" src="/public/images/{{$default_image}}" alt="{{$employee->last_name . ' ' . $employee->first_name}}">
+                                            @endif
+                                        </td>
                                         <td>{{$employee->last_name . ' ' . $employee->first_name}}</td>
                                         <td>
                                             @if($employee->is_manager)
@@ -69,6 +82,7 @@
                                         </td>
                                         <td>{{'#' . $employee->nb_team}}</td>
                                         <td>{{$employee->department_name}}</td>
+                                        <td>{{$employee->position}}</td>
                                         <td class="text-center">
                                             <button class="btn btn-md bg-purple change-employee" data-id_employee="{{$employee->id}}">
                                                 Change
@@ -97,6 +111,10 @@
             $("#employees").DataTable({
                 "pageLength": 25
             });
+            $(document).ready(function() {
+                $("#mainEmployeeNav").addClass('active');
+                $("#viewEmployeeNav").addClass('active');
+            });
         });
 
         $('.delete-employee').on('click', function (e) {
@@ -110,13 +128,18 @@
                 },
                 success: function (response, textStatus, xhr) {
                     edit_schedule = {};
+                    let message = '';
                     if (xhr.status === 200) {
-                        alert('Employee was successfully deleted');
+                        message = 'Employee was successfully deleted!';
+                        if (response.new_manager) {
+                            message += ' ' + response.new_manager + ' is a new manager of team';
+                        }
                         console.log('Employee was successfully deleted');
                     } else {
-                        alert('Error! Try again later');
-                        console.log('Error! Try again later');
+                        message = 'Error! Try again later';
                     }
+                    alert(message);
+                    console.log(message);
                     location.reload();
                 },
                 error: function (xhr, ajaxOptions, thrownError) {

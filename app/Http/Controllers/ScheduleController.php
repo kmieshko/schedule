@@ -88,7 +88,6 @@ class ScheduleController extends Controller
 		$objSchedule = new Schedule();
 		$schedules = $objSchedule->getScheduleByWeek($id_week);
 		$data['schedules'] = $this->sortSchedules($schedules);
-
 		// nb_week => [week_start, week_end]
 		$tmp_weeks = $data['schedules'];
 		$weeks = array();
@@ -489,19 +488,19 @@ class ScheduleController extends Controller
             foreach ($data['weekends'] as $key => $weekend) {
                 $letter = $this->getNameFromNumber($col + $key);
                 $sheet->getColumnDimension($letter)->setAutoSize(true);
-                if($weekend == 'sunday' || !$employee->$weekend) {
-                    // set number
-                    //$sheet->setCellValueByColumnAndRow($col + $key, $row, 0);
-
-                    // set color
-                    $sheet->getStyle($letter. $row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFC000');
-                } else {
+                if($weekend == 'sunday' || $employee->$weekend) {
                     // set number
                     // $sheet->setCellValueByColumnAndRow($col + $key, $row, $employee->$weekend);
 
                     $sheet->setCellValueByColumnAndRow($col + $key, $row, 'OFF');
                     // set color
                     $sheet->getStyle($letter. $row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF00');
+                } else {
+                    // set number
+                    //$sheet->setCellValueByColumnAndRow($col + $key, $row, 0);
+
+                    // set color
+                    $sheet->getStyle($letter. $row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFC000');
                 }
             }
             $row++;

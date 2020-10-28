@@ -1,10 +1,10 @@
 <aside class="main-sidebar">
     <!-- sidebar: style can be found in sidebar.less -->
     <section class="sidebar">
-      
+
       <!-- sidebar menu: : style can be found in sidebar.less -->
       <ul class="sidebar-menu" data-widget="tree">
-        
+
         <li id="dashboardMainMenu">
           <a href="<?php echo url('dashboard') ?>">
             <i class="fa fa-dashboard"></i> <span>Dashboard</span>
@@ -24,6 +24,20 @@
             <li id="createScheduleNav"><a href="<?= url('schedules/create')?>"><i class="fa fa-circle-o"></i>Create Schedule</a></li>
           </ul>
         </li>
+
+          <li class="treeview" id="mainEmployeeNav">
+              <a href="#">
+                  <i class="fa fa-users"></i>
+                  <span>Employee</span>
+                  <span class="pull-right-container">
+                <i class="fa fa-angle-left pull-right"></i>
+              </span>
+              </a>
+              <ul class="treeview-menu">
+                  <li id="viewEmployeeNav"><a href="<?= url('employee/')?>"><i class="fa fa-circle-o"></i>View Employees</a></li>
+                  <li id="createEmployeeNav"><a href="<?= url('employee/create')?>"><i class="fa fa-circle-o"></i>Create Employee</a></li>
+              </ul>
+          </li>
 
 
 
@@ -162,7 +176,7 @@
             <li id="companyNav"><a href="<?php echo url('company/') ?>"><i class="fa fa-files-o"></i> <span>Company</span></a></li>
           <?php endif; ?>
 
-        
+
 
         <!-- <li class="header">Settings</li> -->
 

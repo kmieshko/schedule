@@ -15,13 +15,16 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-//Route::get('/schedules', 'ScheduleController@index');
+// Schedule
 Route::get('/schedules', 'ScheduleController@index2');
-
 Route::post('/schedules/schedule-by-week', 'ScheduleController@ajaxScheduleByWeek');
 Route::get('/schedules/create', 'ScheduleController@create');
 Route::post('/schedules/create-schedule', 'ScheduleController@ajaxCreateSchedule');
 Route::get('/schedules/download-schedule', 'ScheduleController@ajaxDownloadSchedule');
 Route::post('/schedules/save-changes', 'ScheduleController@ajaxSaveChanges');
+
+// Employee
 Route::get('/employee', 'EmployeeController@index');
 Route::post('/employee/delete-employee', 'EmployeeController@ajaxDeleteEmployee');
+Route::get('/employee/create', 'EmployeeController@create');
+Route::post('/employee/create-employee', 'EmployeeController@ajaxCreateEmployee');
