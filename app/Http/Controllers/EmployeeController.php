@@ -26,6 +26,7 @@ class EmployeeController extends Controller
         $this->request = new Request();
         $this->data['page_title'] = 'Employee';
         $this->data['default_image'] = "user.png";
+        $this->data['card_template'] = "grr_template_front.png";
     }
 
     public function index()
@@ -115,5 +116,74 @@ class EmployeeController extends Controller
             return response()->json(array(), 200);
         }
         return response()->json(array(), 204);
+    }
+
+    public function ajaxGetCardTemplate()
+    {
+        $img = file_get_contents(base_path() . "/public/images/" . $this->data['card_template']);
+        $data['template_base64'] = base64_encode($img);
+        return response()->json($data, 200);
+    }
+
+    public function imageDecode($image, $extension) {
+        $mime = '';
+        switch ($extension) {
+            case 'jpg':
+                $mime = 'image/jpeg';
+                break;
+            case 'png':
+                $mime = 'image/png';
+                break;
+            case 'gif':
+                $mime = 'image/gif';
+                break;
+
+        }
+        $result = str_replace('data:'. $mime .';base64,', '', $image);
+        $result = str_replace(' ', '+', $result);
+        $result = base64_decode($result);
+        return $result;
+    }
+
+    public function getExtension($img) {
+
+        $extension = str_replace( 'data:', '', stristr($img, ';base64,', true));
+        switch ($extension) {
+            case 'image/jpeg':
+                $extension = 'jpg';
+                break;
+            case 'image/png':
+                $extension = 'png';
+                break;
+            case 'image/gif':
+                $extension = 'gif';
+                break;
+        }
+        return $extension;
+    }
+
+    public function ajaxSaveIdCard()
+    {
+        if (!empty($_POST)) {
+            $image_front = $_POST["image_front"];
+            $id_card = $_POST["id_card"];
+            $id_employee = $_POST["id_employee"];
+            $extension = $this->getExtension($image_front);
+            $img = $this->imageDecode($image_front, $extension);
+            $name_front = $id_card . '_front.' . $extension;
+            if (!file_exists(base_path() . '/public/images/id_card')) mkdir(base_path() . '/public/images/id_card');
+            $path = base_path() . '/public/images/id_card/' . $name_front;
+            if ($img === false) {
+                return response()->json(array(), 400);
+            } else {
+                file_put_contents($path, $img);
+                $objEmployee = new Employee();
+                $data['id_card'] = $id_card;
+                $data['id'] = $id_employee;
+                $objEmployee->saveIdCard($data);
+                return response()->json(array(), 200);
+            }
+        }
+        return response()->json(array(), 400);
     }
 }

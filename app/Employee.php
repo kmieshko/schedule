@@ -140,4 +140,12 @@ class Employee extends Model
     {
         DB::table('employees')->insert($data);
     }
+
+    public function saveIdCard($data)
+    {
+        $result = DB::table('employees')
+            ->where('id', '=', $data['id'])
+            ->update(['id_card' => $data['id_card']]);
+        return $result;
+    }
 }

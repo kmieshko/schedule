@@ -28,3 +28,5 @@ Route::get('/employee', 'EmployeeController@index');
 Route::post('/employee/delete-employee', 'EmployeeController@ajaxDeleteEmployee');
 Route::get('/employee/create', 'EmployeeController@create');
 Route::post('/employee/create-employee', 'EmployeeController@ajaxCreateEmployee');
+Route::post('/employee/get-card-template', 'EmployeeController@ajaxGetCardTemplate');
+Route::post('/employee/save-id-card', 'EmployeeController@ajaxSaveIdCard');
