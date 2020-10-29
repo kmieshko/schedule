@@ -147,7 +147,6 @@
                 success: function (response, textStatus, xhr) {
                     let message = '';
                     if (xhr.status === 200) {
-                        console.log(response);
                         message = 'Template received!';
                         template.src = 'data:image/png;base64,' + response.template_base64;
                     } else {
@@ -174,7 +173,6 @@
                         if (response.new_manager) {
                             message += ' ' + response.new_manager + ' is a new manager of team';
                         }
-                        console.log('Employee was successfully deleted');
                     } else {
                         message = 'Error! Try again later';
                     }
