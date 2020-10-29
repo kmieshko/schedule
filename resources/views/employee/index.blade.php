@@ -36,6 +36,33 @@
             color: #818496;
             background-color: #dfe5f9;
         }
+        .tooltip-id-card {
+            position: relative;
+            display: inline-block;
+            border-bottom: 1px dotted black;
+        }
+
+        .tooltip-id-card .tooltip-id-card-text {
+            visibility: hidden;
+            width: 120px;
+            background-color: black;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 0;
+
+            /* Position the tooltip */
+            position: absolute;
+            z-index: 1;
+
+            top: 110%;
+            left: 50%;
+            margin-left: -60px; /* Use half of the width (120/2 = 60), to center the tooltip */
+        }
+
+        .tooltip-id-card:hover .tooltip-id-card-text {
+            visibility: visible;
+        }
     </style>
     <div class="content-wrapper">
         <!-- Content Header (Page header) -->
@@ -98,11 +125,15 @@
                                         <td>{{$employee->department_name}}</td>
                                         <td class="employee-position">{{$employee->position}}</td>
                                         <td>
-                                            <button class="id-card btn btn btn-default"
+                                            <button class="id-card btn btn btn-default tooltip-id-card"
                                                     data-id_employee="{{$employee->id}}"
                                                     data-id_card="{{$employee->id_card}}"
                                                 {{($employee->image) ? '' : 'disabled'}}>
                                                 ID CARD
+                                                @if(!$employee->id_card)
+                                                <span class="tooltip-id-card-text">Photo needed</span>
+                                                @endif
+
                                             </button>
                                         </td>
                                         <td class="text-center">
@@ -126,14 +157,15 @@
             </div>
             <!-- /.row -->
 
-            <canvas id="canvas-upload" height="720px" width="1280px" class=""></canvas>
-            <img id="qr-code" src="" class="" alt="qr"/>
+            <canvas id="canvas-upload-front" height="638" width="1013" class=""></canvas>
+            <canvas id="canvas-upload-back" height="638" width="1013" class=""></canvas>
         </section>
     </div>
 
     <script>
 
-        let template = new Image();
+        let front_template = new Image();
+        let back_template = new Image();
         $(document).ready(function() {
             $("#employees").DataTable({
                 "pageLength": 25
@@ -148,7 +180,8 @@
                     let message = '';
                     if (xhr.status === 200) {
                         message = 'Template received!';
-                        template.src = 'data:image/png;base64,' + response.template_base64;
+                        front_template.src = 'data:image/png;base64,' + response.front_template_base64;
+                        back_template.src = 'data:image/png;base64,' + response.back_template_base64;
                     } else {
                         message = 'Error receiving template! Try again later';
                     }
@@ -239,7 +272,8 @@
                 small: 155,
                 medium: 186,
                 large: 248,
-                xlage: 300
+                xlage: 375,
+                xxlage: 450,
             };
             let data = "ID " + obj.id_card +
                 "%0A" +
@@ -250,7 +284,7 @@
                 "GRR Cooling Experts Inc.%0A" +
                 "159 20th Street, Brooklyn, 11232%0A%0A" +
                 "718-768-3740%0A";
-            return "http://chart.apis.google.com/chart?cht=qr&chl=" + data + "&chs=" + size.small;
+            return "http://chart.apis.google.com/chart?cht=qr&chl=" + data + "&chs=" + size.xlage;
         }
 
         $('.id-card').on('click', function(e){
@@ -276,44 +310,49 @@
             };
 
             /*********CANVAS*****************/
-            let canvas =  document.getElementById('canvas-upload');
-            let context = canvas.getContext('2d');
-            context.clearRect(0, 0, canvas.width, canvas.height);
-            let width = 1280;
-            let height = 720;
+            let front_canvas =  document.getElementById('canvas-upload-front');
+            let back_canvas =  document.getElementById('canvas-upload-back');
+            let front_context = front_canvas.getContext('2d');
+            let back_context = back_canvas.getContext('2d');
+            front_context.clearRect(0, 0, front_canvas.width, front_canvas.height);
+            back_context.clearRect(0, 0, back_canvas.width, back_canvas.height);
             let emplPhotoSize = 256;
-            let result = ScaleImage(template.width, template.height, width, height, false);
 
-            // Draw Template
-            context.drawImage(template, 0, 0, template.width, template.height, result.targetleft, result.targettop, result.width, result.height);
+            // Draw Front Template
+            front_context.drawImage(front_template, 0, 0);
+            // Draw Back Template
+            back_context.drawImage(back_template, 0, 0);
 
             // Draw employee photo
-            context.drawImage(image_employee, 300, 300, emplPhotoSize, emplPhotoSize);
+            front_context.drawImage(image_employee, 100, 250, emplPhotoSize, emplPhotoSize);
 
-            // Draw QR Code
+            // Draw QR Code on Back Canvas
             let qr = new Image();
             qr.onload = function() {
-                context.drawImage(qr, 300, 300);
+                back_context.drawImage(qr, 530, 110);
             };
             qr.src = generateQrCode(obj);
 
-            //add Text to Canvas
-            let text = "ID " + obj.id_card + "\n\n" +
+            //add Text to Front Canvas
+            let text = "ID number  " + obj.id_card + "\n\n" +
                 obj.employeeName + "\n" +
                 obj.employeePosition + "\n";
-            let x = 600;
-            let y = 200;
-            let lineHeight = 40;
+            let x = 450;
+            let y = 300;
+            let lineHeight = 60;
             let lines = text.split('\n');
-            context.font = "30px sans-serif";
+            front_context.font = "40px sans-serif";
             for (let i = 0; i < lines.length; i++) {
-                context.fillText(lines[i], x, y + (i * lineHeight));
+                front_context.fillText(lines[i], x, y + (i * lineHeight));
             }
 
-            let res_img_front = convertCanvasToImage(canvas);
+            // delay needed
+            let res_img_front = convertCanvasToImage(front_canvas);
+            let res_img_back = convertCanvasToImage(back_canvas);
 
             let send = {
                 image_front: res_img_front.src,
+                image_back: res_img_back.src,
                 id_card: obj.id_card,
                 id_employee: obj.id_employee
             };

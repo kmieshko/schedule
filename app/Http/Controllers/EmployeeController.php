@@ -26,7 +26,8 @@ class EmployeeController extends Controller
         $this->request = new Request();
         $this->data['page_title'] = 'Employee';
         $this->data['default_image'] = "user.png";
-        $this->data['card_template'] = "grr_template_front.png";
+        $this->data['grr_template_front'] = "grr_template_front.png";
+        $this->data['grr_template_back'] = "grr_template_back.png";
     }
 
     public function index()
@@ -120,8 +121,10 @@ class EmployeeController extends Controller
 
     public function ajaxGetCardTemplate()
     {
-        $img = file_get_contents(base_path() . "/public/images/" . $this->data['card_template']);
-        $data['template_base64'] = base64_encode($img);
+        $img_front = file_get_contents(base_path() . "/public/images/" . $this->data['grr_template_front']);
+        $img_back = file_get_contents(base_path() . "/public/images/" . $this->data['grr_template_back']);
+        $data['front_template_base64'] = base64_encode($img_front);
+        $data['back_template_base64'] = base64_encode($img_back);
         return response()->json($data, 200);
     }
 
@@ -166,17 +169,22 @@ class EmployeeController extends Controller
     {
         if (!empty($_POST)) {
             $image_front = $_POST["image_front"];
+            $image_back = $_POST["image_back"];
             $id_card = $_POST["id_card"];
             $id_employee = $_POST["id_employee"];
             $extension = $this->getExtension($image_front);
-            $img = $this->imageDecode($image_front, $extension);
+            $decoded_front = $this->imageDecode($image_front, $extension);
+            $decoded_back = $this->imageDecode($image_back, $extension);
             $name_front = $id_card . '_front.' . $extension;
+            $name_back = $id_card . '_back.' . $extension;
             if (!file_exists(base_path() . '/public/images/id_card')) mkdir(base_path() . '/public/images/id_card');
-            $path = base_path() . '/public/images/id_card/' . $name_front;
-            if ($img === false) {
+            $path_front = base_path() . '/public/images/id_card/' . $name_front;
+            $path_back = base_path() . '/public/images/id_card/' . $name_back;
+            if ($decoded_front === false || $decoded_back === false) {
                 return response()->json(array(), 400);
             } else {
-                file_put_contents($path, $img);
+                file_put_contents($path_front, $decoded_front);
+                file_put_contents($path_back, $decoded_back);
                 $objEmployee = new Employee();
                 $data['id_card'] = $id_card;
                 $data['id'] = $id_employee;
