@@ -188,7 +188,7 @@ class EmployeeController extends Controller
                 $objEmployee = new Employee();
                 $data['id_card'] = $id_card;
                 $data['id'] = $id_employee;
-                //$objEmployee->saveIdCard($data);
+                $objEmployee->saveIdCard($data);
                 return response()->json(array(), 200);
             }
         }
