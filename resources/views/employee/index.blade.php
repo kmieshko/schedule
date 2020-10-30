@@ -1,4 +1,12 @@
 @section('body')
+    <CORSConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+        <CORSRule>
+            <AllowedOrigin>*</AllowedOrigin>
+            <AllowedMethod>GET</AllowedMethod>
+            <MaxAgeSeconds>3000</MaxAgeSeconds>
+        </CORSRule>
+    </CORSConfiguration>
+
     <style>
         .pretty.p-switch.p-fill input:checked~.state:before {
             border-color: #605ca8;
@@ -64,6 +72,7 @@
             visibility: visible;
         }
     </style>
+
     <div class="content-wrapper">
         <!-- Content Header (Page header) -->
         <section class="content-header">
@@ -161,7 +170,8 @@
             <canvas id="canvas-upload-back" height="638" width="1013" class=""></canvas>
         </section>
     </div>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropper/4.1.0/cropper.min.js" integrity="sha512-E+gDQcIvNXE60SjCS38ysf1mGh4ObBpKcUOp0oEaHQHQAdaN2p7GelOpgEdpTuCLoIJyLkNXiqFZbyD9Ak/Ygw==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cropper/1.0.1/jquery-cropper.min.js" integrity="sha512-V8cSoC5qfk40d43a+VhrTEPf8G9dfWlEJgvLSiq2T2BmgGRmZzB8dGe7XAABQrWj3sEfrR5xjYICTY4eJr76QQ==" crossorigin="anonymous"></script>
     <script>
 
         let front_template = new Image();
@@ -320,18 +330,9 @@
 
             // Draw Front Template
             front_context.drawImage(front_template, 0, 0);
-            // Draw Back Template
-            back_context.drawImage(back_template, 0, 0);
 
             // Draw employee photo
             front_context.drawImage(image_employee, 100, 250, emplPhotoSize, emplPhotoSize);
-
-            // Draw QR Code on Back Canvas
-            let qr = new Image();
-            qr.onload = function() {
-                back_context.drawImage(qr, 530, 110);
-            };
-            qr.src = generateQrCode(obj);
 
             //add Text to Front Canvas
             let text = "ID number  " + obj.id_card + "\n\n" +
@@ -346,34 +347,44 @@
                 front_context.fillText(lines[i], x, y + (i * lineHeight));
             }
 
-            // delay needed
-            let res_img_front = convertCanvasToImage(front_canvas);
-            let res_img_back = convertCanvasToImage(back_canvas);
+            // Draw Back Template
+            back_context.drawImage(back_template, 0, 0);
 
-            let send = {
-                image_front: res_img_front.src,
-                image_back: res_img_back.src,
-                id_card: obj.id_card,
-                id_employee: obj.id_employee
+            // Draw QR Code on Back Canvas
+            let qr = new Image();
+            qr.setAttribute('crossOrigin', 'anonymous');
+            qr.onload = function() {
+                back_context.drawImage(qr, 530, 110);
+
+                let res_img_front = convertCanvasToImage(front_canvas);
+                let res_img_back = convertCanvasToImage(back_canvas);
+
+                let send = {
+                    image_front: res_img_front.src,
+                    image_back: res_img_back.src,
+                    id_card: obj.id_card,
+                    id_employee: obj.id_employee
+                };
+                $.ajax({
+                    url: '/employee/save-id-card',
+                    method: 'post',
+                    contentType: 'application/x-www-form-urlencoded',
+                    data: send,
+                    success: function (response, textStatus, xhr) {
+                        let message = '';
+                        if (xhr.status === 200) {
+                            message = 'Success';
+                        } else {
+                            message = 'Error!';
+                        }
+                        console.log(message);
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        alert(thrownError);
+                    },
+                });
             };
-            $.ajax({
-                url: '/employee/save-id-card',
-                method: 'post',
-                contentType: 'application/x-www-form-urlencoded',
-                data: send,
-                success: function (response, textStatus, xhr) {
-                    let message = '';
-                    if (xhr.status === 200) {
-                        message = 'Success';
-                    } else {
-                        message = 'Error!';
-                    }
-                    console.log(message);
-                },
-                error: function (xhr, ajaxOptions, thrownError) {
-                    alert(thrownError);
-                },
-            });
+            qr.src = generateQrCode(obj);
         });
     </script>
 @endsection
