@@ -148,4 +148,21 @@ class Employee extends Model
             ->update(['id_card' => $data['id_card']]);
         return $result;
     }
+
+    public function getIdCard($data)
+    {
+        $result = DB::table('employees')
+            ->where('id', '=', $data['id'])
+            ->get()
+            ->toArray();
+        return !empty($result) ? $result[0] : array();
+    }
+
+    public function saveChanges($data)
+    {
+        $result = DB::table('employees')
+            ->where('id', '=', $data['id'])
+            ->update($data);
+        return $result;
+    }
 }

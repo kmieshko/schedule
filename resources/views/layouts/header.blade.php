@@ -31,8 +31,6 @@
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
 	<!-- AdminLTE App -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.4.18/js/adminlte.min.js"></script>
-	<!-- AdminLTE dashboard demo (This is only for demo purposes) -->
-	<script src="https://cdn.bootcss.com/admin-lte/2.4.18/js/pages/dashboard.js"></script>
 	<!-- My Functions -->
 	<script src="/public/js/functions.js"></script>
 	<!-- Ajax CSRF -->

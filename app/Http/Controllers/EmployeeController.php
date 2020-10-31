@@ -38,6 +38,12 @@ class EmployeeController extends Controller
         $objEmployee = new Employee();
         $employees = $objEmployee->getAllEmployeesWithDepartments();
         $data['employees'] = $employees;
+        $tmp_dept = $objEmployee->getDepartments();
+        $departments = array();
+        foreach ($tmp_dept as $dept) {
+            $departments[$dept->id] = $dept->name;
+        }
+        $data['departments'] = $departments;
         return view('combined')->with($data);
     }
 
@@ -193,5 +199,59 @@ class EmployeeController extends Controller
             }
         }
         return response()->json(array(), 400);
+    }
+
+    public function ajaxGetIdCard()
+    {
+        if (!empty($_POST)) {
+            $objEmployee = new Employee();
+            $img = $objEmployee->getIdCard($_POST);
+            $img_name = $img->id_card;
+            if (empty($img_name)) return response()->json(array(), 204);
+            $data['front_id_card'] = '/public/images/id_card/' . $img_name . '_front.png';
+            $data['back_id_card'] = '/public/images/id_card/' . $img_name . '_back.png';
+            $data['id_card'] = $img_name;
+            return response()->json($data, 200);
+        }
+        return response()->json(array(), 404);
+    }
+
+    public function ajaxSaveChanges()
+    {
+        if (!empty($_POST)) {
+            $image = '';
+            if(isset($_FILES['file']['name'])) {
+
+                /* Getting file name */
+                $filename = $_FILES['file']['name'];
+
+                /* Location */
+                $new_name = time () . $filename;
+                $location = base_path() . "/public/images/" . $new_name;
+                $imageFileType = pathinfo($location, PATHINFO_EXTENSION);
+                $imageFileType = strtolower($imageFileType);
+
+                /* Valid extensions */
+                $valid_extensions = array("jpg", "jpeg", "png");
+
+                $response = 0;
+                /* Check file extension */
+                if (in_array(strtolower($imageFileType), $valid_extensions)) {
+                    /* Upload file */
+                    if (move_uploaded_file($_FILES['file']['tmp_name'], $location)) {
+                        $image = $new_name;
+                    }
+                }
+            }
+            $data['id'] = $_POST['id_employee'];
+            $data['image'] = $image;
+            $data['first_name'] = $_POST['first_name'];
+            $data['last_name'] = $_POST['last_name'];
+            $data['position'] = $_POST['position'];
+            $objEmployee = new Employee();
+            $objEmployee->saveChanges($data);
+            return response()->json($_POST, 200);
+        }
+        return response()->json(array(), 404);
     }
 }

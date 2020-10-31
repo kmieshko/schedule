@@ -1,28 +1,11 @@
 @section('body')
-    <CORSConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
-        <CORSRule>
-            <AllowedOrigin>*</AllowedOrigin>
-            <AllowedMethod>GET</AllowedMethod>
-            <MaxAgeSeconds>3000</MaxAgeSeconds>
-        </CORSRule>
-    </CORSConfiguration>
 
     <style>
-        .pretty.p-switch.p-fill input:checked~.state:before {
-            border-color: #605ca8;
-            background-color: #605ca8 !important;
-        }
-        .pretty.p-switch .state label:after {
-            background-color: #605ca8 !important;
-        }
         .box-body {
             overflow-x: auto;
         }
         .p-5 {
             padding: 5px;
-        }
-        .row {
-            margin: 0 !important;
         }
         .bg-purple {
             white-space: normal !important;
@@ -71,6 +54,37 @@
         .tooltip-id-card:hover .tooltip-id-card-text {
             visibility: visible;
         }
+
+        #idCardModal .modal-content {
+            /*height: 638px;*/
+            /*width: 1013px;*/
+        }
+
+        div canvas {
+            width: 100%;
+            border: 4px solid #283371;
+        }
+
+        .upload-btn-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            margin: 20px 0;
+        }
+
+        .btn-upload {
+            border: 2px solid #605ca8;
+            color: #605ca8;
+            background-color: white;
+        }
+
+        .upload-btn-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+        }
     </style>
 
     <div class="content-wrapper">
@@ -90,7 +104,7 @@
         <section class="content">
             <!-- Small boxes (Stat box) -->
             <div class="row">
-                <div class="col-md-10 col-md-offset-1">
+                <div class="col-md-12">
                     <div class="box box-purple p-5">
                         <div class="box-header">
                             <h3 class="box-title">Employees</h3>
@@ -123,21 +137,24 @@
                                             @endif
                                         </td>
                                         <td class="employee-name">{{$employee->last_name . ' ' . $employee->first_name}}</td>
-                                        <td>
+                                        <td class="employee-post">
                                             @if($employee->is_manager)
-                                                <span>Manager</span>
+                                                manager
                                             @else
-                                                <span>Worker</span>
+                                                worker
                                             @endif
                                         </td>
-                                        <td>{{'#' . $employee->nb_team}}</td>
-                                        <td>{{$employee->department_name}}</td>
+                                        <td class="employee-team">{{'#' . $employee->nb_team}}</td>
+                                        <td class="employee-department">{{$employee->department_name}}</td>
                                         <td class="employee-position">{{$employee->position}}</td>
                                         <td>
-                                            <button class="id-card btn btn btn-default tooltip-id-card"
+                                            <button class="id-card btn tooltip-id-card"
                                                     data-id_employee="{{$employee->id}}"
                                                     data-id_card="{{$employee->id_card}}"
-                                                {{($employee->image) ? '' : 'disabled'}}>
+                                                    {{($employee->image) ? '' : 'disabled'}}
+                                                    data-toggle="modal"
+                                                    data-target="#idCardModal"
+                                            >
                                                 ID CARD
                                                 @if(!$employee->id_card)
                                                 <span class="tooltip-id-card-text">Photo needed</span>
@@ -146,7 +163,9 @@
                                             </button>
                                         </td>
                                         <td class="text-center">
-                                            <button class="btn btn-md bg-purple change-employee" data-id_employee="{{$employee->id}}">
+                                            <button class="btn btn-md bg-purple change-employee"
+                                                    data-id_employee="{{$employee->id}}"
+                                            >
                                                 Change
                                             </button>
                                         </td>
@@ -166,16 +185,93 @@
             </div>
             <!-- /.row -->
 
-            <canvas id="canvas-upload-front" height="638" width="1013" class=""></canvas>
-            <canvas id="canvas-upload-back" height="638" width="1013" class=""></canvas>
+
+            <!-- Modal ID-card-->
+            <div class="modal fade" id="idCardModal" tabindex="-1" role="dialog">
+                <div class="modal-dialog " role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title">Employee's ID-card</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="front-canvas-block">
+                                <canvas id="canvas-upload-front" height="638" width="1013" class=""></canvas>
+                            </div>
+                            <div class="black-canvas-block">
+                                <canvas id="canvas-upload-back" height="638" width="1013" class=""></canvas>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Change Employee-->
+            <div class="modal fade" id="changeEmployeeModal" tabindex="-1" role="dialog">
+                <div class="modal-dialog " role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title">Change employee info</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form id="form">
+                                <div class="row">
+                                    <div class="col-md-5">
+                                        <div class="form-group">
+                                            <div class="text-center">
+                                                <img id="imgPreview" src="/public/images/user.png" alt="user photo" class="img-responsive employee-photo">
+                                                <div class="upload-btn-wrapper">
+                                                    <button class="btn btn-default btn-upload">Upload a file</button>
+                                                    <input type='file' name="file" id="imgInput" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="invisible">
+                                        <label for="id_employee">ID employee</label>
+                                        <input type="text" class="form-control" id="id_employee" name="id_employee">
+                                    </div>
+                                    <div class="col-md-7">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="firstName">First Name</label>
+                                                    <input type="text" class="form-control" id="firstName" name="first_name" placeholder="John" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="lastName">Last Name</label>
+                                                    <input type="text" class="form-control" id="lastName" name="last_name" placeholder="Doe" required>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="position">Position</label>
+                                            <input type="text" class="form-control" id="position" name="position" placeholder="Mechanic" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button id="save-changes" type="button" class="btn bg-purple">Save changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </section>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropper/4.1.0/cropper.min.js" integrity="sha512-E+gDQcIvNXE60SjCS38ysf1mGh4ObBpKcUOp0oEaHQHQAdaN2p7GelOpgEdpTuCLoIJyLkNXiqFZbyD9Ak/Ygw==" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cropper/1.0.1/jquery-cropper.min.js" integrity="sha512-V8cSoC5qfk40d43a+VhrTEPf8G9dfWlEJgvLSiq2T2BmgGRmZzB8dGe7XAABQrWj3sEfrR5xjYICTY4eJr76QQ==" crossorigin="anonymous"></script>
     <script>
 
         let front_template = new Image();
         let back_template = new Image();
+
         $(document).ready(function() {
             $("#employees").DataTable({
                 "pageLength": 25
@@ -183,6 +279,7 @@
             $("#mainEmployeeNav").addClass('active');
             $("#viewEmployeeNav").addClass('active');
 
+            // GET TEMPLATES FOR ID CARD
             $.ajax({
                 url: '/employee/get-card-template',
                 method: 'post',
@@ -200,6 +297,8 @@
             });
         });
 
+        /************DELETE EMPLOYEE START***********/
+
         $('.delete-employee').on('click', function (e) {
             let data = $(e.target).data();
             $.ajax({
@@ -207,7 +306,7 @@
                 method: 'POST',
                 data: data,
                 beforeSend: function () {
-                    $('button').attr('disabled', true);
+                    $('.delete-employee').attr('disabled', true);
                 },
                 success: function (response, textStatus, xhr) {
                     let message = '';
@@ -227,46 +326,15 @@
                     alert(thrownError);
                 },
                 complete: function () {
-                    $('button').attr('disabled', false);
+                    $('.delete-employee').attr('disabled', false);
                 }
-            })
+            });
         });
 
+        /**********DELETE EMPLOYEE END***************/
 
-        /***********************ID CARD************************/
 
-        function ScaleImage(srcwidth, srcheight, targetwidth, targetheight, fLetterBox) {
-
-            var result = {width: 0, height: 0, fScaleToTargetWidth: true};
-            if ((srcwidth <= 0) || (srcheight <= 0) || (targetwidth <= 0) || (targetheight <= 0)) {
-                return result;
-            }
-            var scaleX1 = targetwidth;
-            var scaleY1 = (srcheight * targetwidth) / srcwidth;
-            var scaleX2 = (srcwidth * targetheight) / srcheight;
-            var scaleY2 = targetheight;
-            var fScaleOnWidth = (scaleX2 > targetwidth);
-            if (fScaleOnWidth) {
-                fScaleOnWidth = fLetterBox;
-            }
-            else {
-                fScaleOnWidth = !fLetterBox;
-            }
-
-            if (fScaleOnWidth) {
-                result.width = Math.floor(scaleX1);
-                result.height = Math.floor(scaleY1);
-                result.fScaleToTargetWidth = true;
-            }
-            else {
-                result.width = Math.floor(scaleX2);
-                result.height = Math.floor(scaleY2);
-                result.fScaleToTargetWidth = false;
-            }
-            result.targetleft = Math.floor((targetwidth - result.width) / 2);
-            result.targettop = Math.floor((targetheight - result.height) / 2);
-            return result;
-        }
+        /**********ID-CARD START***************/
 
         function convertCanvasToImage(canvas) {
             let new_image = new Image();
@@ -297,42 +365,15 @@
             return "http://chart.apis.google.com/chart?cht=qr&chl=" + data + "&chs=" + size.xlage;
         }
 
-        $('.id-card').on('click', function(e){
-
-            let is_id = $(e.target).parents('.employee').find('.id-card').data().id_card;
-            if (is_id) return false;
-
-            let data = $(e.target).parents('.employee');
-            let employeeName = data.children('.employee-name').text();
-            let employeePosition = data.children('.employee-position').text();
-            let image_employee = data.find('.employee-image')[0];
-            let employeeImgPath = data.find('.employee-image').attr('src');
-            let id_employee = $(e.target).data().id_employee;
-            let d = new Date();
-            let id_card = (d.getTime() + d.getTimezoneOffset() * 60 * 1000);
-            let obj = {
-                employeeName: employeeName,
-                employeePosition: employeePosition,
-                image_employee: image_employee,
-                id_card: id_card,
-                id_employee: id_employee,
-                employeeImgPath: employeeImgPath
-            };
-
-            /*********CANVAS*****************/
-            let front_canvas =  document.getElementById('canvas-upload-front');
-            let back_canvas =  document.getElementById('canvas-upload-back');
-            let front_context = front_canvas.getContext('2d');
-            let back_context = back_canvas.getContext('2d');
-            front_context.clearRect(0, 0, front_canvas.width, front_canvas.height);
-            back_context.clearRect(0, 0, back_canvas.width, back_canvas.height);
+        function createAndSaveIdCard(front_canvas, back_canvas, front_context, back_context, obj)
+        {
             let emplPhotoSize = 256;
 
             // Draw Front Template
             front_context.drawImage(front_template, 0, 0);
 
             // Draw employee photo
-            front_context.drawImage(image_employee, 100, 250, emplPhotoSize, emplPhotoSize);
+            front_context.drawImage(obj.image_employee, 100, 250, emplPhotoSize, emplPhotoSize);
 
             //add Text to Front Canvas
             let text = "ID number  " + obj.id_card + "\n\n" +
@@ -365,6 +406,8 @@
                     id_card: obj.id_card,
                     id_employee: obj.id_employee
                 };
+
+                // Save Id Card
                 $.ajax({
                     url: '/employee/save-id-card',
                     method: 'post',
@@ -374,6 +417,7 @@
                         let message = '';
                         if (xhr.status === 200) {
                             message = 'Success';
+                            $('#idCardModal').modal('show');
                         } else {
                             message = 'Error!';
                         }
@@ -385,6 +429,143 @@
                 });
             };
             qr.src = generateQrCode(obj);
+        }
+
+        $('.id-card').on('click', function(e){
+            e.preventDefault();
+            let target = $(e.target);
+            let id_employee = target.data().id_employee;
+            let data = target.parents('.employee');
+            let employeeName = data.children('.employee-name').text();
+            let employeePosition = data.children('.employee-position').text();
+            let image_employee = data.find('.employee-image')[0];
+            let employeeImgPath = data.find('.employee-image').attr('src');
+            let d = new Date();
+            let id_card = (d.getTime() + d.getTimezoneOffset() * 60 * 1000);
+            let obj = {
+                employeeName: employeeName,
+                employeePosition: employeePosition,
+                image_employee: image_employee,
+                id_card: id_card,
+                id_employee: id_employee,
+                employeeImgPath: employeeImgPath
+            };
+
+            $.ajax({
+                url: '/employee/get-id-card',
+                method: 'POST',
+                contentType: 'application/x-www-form-urlencoded',
+                data: {id: obj.id_employee},
+                beforeSend: function() {
+                    $('button.change-employee').attr('disabled', true);
+                    $('button.delete-employee').attr('disabled', true);
+
+                    // clear canvas
+                    let front_canvas =  $('#canvas-upload-front')[0];
+                    let back_canvas =  $('#canvas-upload-back')[0];
+                    let front_context = front_canvas.getContext('2d');
+                    let back_context = back_canvas.getContext('2d');
+                    front_context.clearRect(0, 0, front_canvas.width, front_canvas.height);
+                    back_context.clearRect(0, 0, back_canvas.width, back_canvas.height);
+                },
+                success: function (response, textStatus, xhr) {
+                    let front_canvas =  $('#canvas-upload-front')[0];
+                    let back_canvas =  $('#canvas-upload-back')[0];
+                    let front_context = front_canvas.getContext('2d');
+                    let back_context = back_canvas.getContext('2d');
+                    front_context.clearRect(0, 0, front_canvas.width, front_canvas.height);
+                    back_context.clearRect(0, 0, back_canvas.width, back_canvas.height);
+                    if (xhr.status === 200) {
+                        let front = new Image();
+                        let back = new Image();
+                        front.src = response.front_id_card;
+                        back.src = response.back_id_card;
+                        // front_context.drawImage(front, 0, 0);
+                        // back_context.drawImage(back, 0, 0);
+                        front.onload = function(){ front_context.drawImage(front, 0, 0); };
+                        back.onload = function(){ back_context.drawImage(back, 0, 0); };
+                        $('#idCardModal').modal('show');
+                        console.log(front);
+                    } else if (xhr.status === 204) {
+                        console.log('ID-card Not found. Creating new ID-card');
+                        createAndSaveIdCard(front_canvas, back_canvas, front_context, back_context, obj);
+                    } else {
+                        alert('Error creating ID-card! Reload page and try again!');
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert(thrownError+1);
+                },
+                complete: function () {
+                    $('button.change-employee').attr('disabled', false);
+                    $('button.delete-employee').attr('disabled', false);
+                }
+            });
         });
+
+        /**********ID-CARD END***************/
+
+
+        /**********CHANGE EMPLOYEE START***************/
+
+        function readURL(input) {
+            if (input.files && input.files[0]) {
+                let reader = new FileReader();
+
+                reader.onload = function(e) {
+                    $('#imgPreview').attr('src', e.target.result);
+                };
+
+                reader.readAsDataURL(input.files[0]); // convert to base64 string
+            }
+        }
+
+        $("#imgInput").change(function() {
+            readURL(this);
+        });
+
+        $('.change-employee').on('click', function (e) {
+            e.preventDefault();
+            let target = $(e.target);
+            let data = target.parents('.employee');
+            let id_employee = target.data().id_employee;
+            let employeeName = data.children('.employee-name').text().split(' ');
+            let employeePosition = data.children('.employee-position').text();
+            let employeeImage = data.children('.employee-photo').find('.employee-image')[0].src;
+            console.log(employeeImage);
+            $('#imgPreview').attr("src", employeeImage);
+            $('#changeEmployeeModal').modal('show');
+            $('#lastName').val(employeeName[0]);
+            $('#firstName').val(employeeName[1]);
+            $('#position').val(employeePosition);
+            $('#id_employee').val(id_employee);
+        });
+
+        $('#save-changes').on('click', function (e) {
+            e.preventDefault();
+            let formData = new FormData($('form')[0]);
+            console.log(formData);
+            $.ajax({
+                url: '/employee/save-changes',
+                method: 'post',
+                data: formData,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (response, textStatus, xhr) {
+                    if (xhr.status === 200) {
+                        alert('Success!');
+                    } else {
+                        alert('Error! Try again');
+                    }
+                    location.reload();
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert(thrownError);
+                }
+            });
+        });
+
+        /**********CHANGE EMPLOYEE END***************/
     </script>
 @endsection

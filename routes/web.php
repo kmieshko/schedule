@@ -30,3 +30,5 @@ Route::get('/employee/create', 'EmployeeController@create');
 Route::post('/employee/create-employee', 'EmployeeController@ajaxCreateEmployee');
 Route::post('/employee/get-card-template', 'EmployeeController@ajaxGetCardTemplate');
 Route::post('/employee/save-id-card', 'EmployeeController@ajaxSaveIdCard');
+Route::post('/employee/get-id-card', 'EmployeeController@ajaxGetIdCard');
+Route::post('/employee/save-changes', 'EmployeeController@ajaxSaveChanges');
