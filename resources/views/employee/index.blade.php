@@ -85,6 +85,20 @@
             top: 0;
             opacity: 0;
         }
+
+        .loader {
+            border: 16px solid #9e9aff; /* Light grey */
+            border-top: 16px solid #605ca8; /* Blue */
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 
     <div class="content-wrapper">
@@ -131,7 +145,7 @@
                                         <td>{{$key + 1}}</td>
                                         <td class="text-center employee-photo">
                                             @if($employee->image)
-                                                <img class="small-image employee-image" src="/public/images/{{$employee->image}}" alt="{{$employee->last_name . ' ' . $employee->first_name}}">
+                                                <img class="small-image employee-image" src="/public/images/employee_photo/{{$employee->image}}" alt="{{$employee->last_name . ' ' . $employee->first_name}}">
                                             @else
                                                 <img class="small-image employee-image" src="/public/images/{{$default_image}}" alt="{{$employee->last_name . ' ' . $employee->first_name}}">
                                             @endif
@@ -218,7 +232,7 @@
                             <h4 class="modal-title">Change employee info</h4>
                         </div>
                         <div class="modal-body">
-                            <form id="form">
+                            <form id="form-employee-info">
                                 <div class="row">
                                     <div class="col-md-5">
                                         <div class="form-group">
@@ -259,7 +273,7 @@
                             </form>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button id="close-changes" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                             <button id="save-changes" type="button" class="btn bg-purple">Save changes</button>
                         </div>
                     </div>
@@ -480,8 +494,6 @@
                         let back = new Image();
                         front.src = response.front_id_card;
                         back.src = response.back_id_card;
-                        // front_context.drawImage(front, 0, 0);
-                        // back_context.drawImage(back, 0, 0);
                         front.onload = function(){ front_context.drawImage(front, 0, 0); };
                         back.onload = function(){ back_context.drawImage(back, 0, 0); };
                         $('#idCardModal').modal('show');
@@ -524,6 +536,10 @@
             readURL(this);
         });
 
+        $('#close-changes').on('click', function () {
+            $("#imgInput").val('');
+        });
+
         $('.change-employee').on('click', function (e) {
             e.preventDefault();
             let target = $(e.target);
@@ -543,8 +559,7 @@
 
         $('#save-changes').on('click', function (e) {
             e.preventDefault();
-            let formData = new FormData($('form')[0]);
-            console.log(formData);
+            let formData = new FormData($('#form-employee-info')[0]);
             $.ajax({
                 url: '/employee/save-changes',
                 method: 'post',

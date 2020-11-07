@@ -100,7 +100,7 @@ class EmployeeController extends Controller
 
                 /* Location */
                 $new_name = time () . $filename;
-                $location = base_path() . "/public/images/" . $new_name;
+                $location = base_path() . "/public/images/employee_photo/" . $new_name;
                 $imageFileType = pathinfo($location, PATHINFO_EXTENSION);
                 $imageFileType = strtolower($imageFileType);
 
@@ -227,7 +227,8 @@ class EmployeeController extends Controller
 
                 /* Location */
                 $new_name = time () . $filename;
-                $location = base_path() . "/public/images/" . $new_name;
+                if (!file_exists(base_path() . '/public/images/employee_photo')) mkdir(base_path() . '/public/images/employee_photo');
+                $location = base_path() . "/public/images/employee_photo/" . $new_name;
                 $imageFileType = pathinfo($location, PATHINFO_EXTENSION);
                 $imageFileType = strtolower($imageFileType);
 
@@ -243,12 +244,26 @@ class EmployeeController extends Controller
                     }
                 }
             }
+
+            // delete previous id_card
+            $objEmployee = new Employee();
             $data['id'] = $_POST['id_employee'];
-            $data['image'] = $image;
+            $img = $objEmployee->getIdCard($data);
+            $img_name = $img->id_card;
+            if (!empty($img_name)) {
+                unlink(base_path() . '/public/images/id_card/' . $img_name . '_front.png');
+                unlink(base_path() . '/public/images/id_card/' . $img_name . '_back.png');
+            }
+            $data['id_card'] = NULL;
+            $objEmployee->saveIdCard($data);
+
+            // save changes
+            if (!empty($image)) {
+                $data['image'] =  $image;
+            }
             $data['first_name'] = $_POST['first_name'];
             $data['last_name'] = $_POST['last_name'];
             $data['position'] = $_POST['position'];
-            $objEmployee = new Employee();
             $objEmployee->saveChanges($data);
             return response()->json($_POST, 200);
         }
