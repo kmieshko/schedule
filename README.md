@@ -11,7 +11,7 @@ It's a first steps in developing CRM system for a company that has been operated
 ## Features
 
 **Scheduling**
- * Scheduling for all employees based on their occupation, role and number department. The algorithm works automatically and doesn't need to involve the supervisor (complete)
+ * Scheduling for all employees based on their occupation, role and number department. The algorithm works automatically and doesn't need to involve the supervisor
  * Edit schedule
  * Download via Excel
  
