@@ -290,7 +290,7 @@
                 if (obj.template === 'grr') {
                     back_context.drawImage(qr, 530, 110);
                 } else {
-                    back_context.drawImage(qr, 530, 215);
+                    back_context.drawImage(qr, 298, 215);
                 }
                 let res_img_front = convertCanvasToImage(front_canvas);
                 let res_img_back = convertCanvasToImage(back_canvas);
