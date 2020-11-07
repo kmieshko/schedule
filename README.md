@@ -15,7 +15,7 @@ It's a first steps in developing CRM system for a company that has been operated
  * Edit schedule
  * Download via Excel
  
- ** Employee**
+ **Employee**
  * Create employee
  * Edit employee
  * Generate employee ID Card*
@@ -26,6 +26,6 @@ It's a first steps in developing CRM system for a company that has been operated
 1. Products (Create / update / delete products on stock)
 2. Scanning the barcodes and ctock control
 
-## A few screenshots
+## Example
 
 
