@@ -66,7 +66,7 @@
                                     <div class="col-md-5">
                                         <div class="form-group">
                                             <div class="text-center">
-                                                <img id="imgPreview" src="/public/images/user.png" alt="user photo" class="img-responsive employee-photo">
+                                                <img id="imgPreview" src="/public/images/id-card.png" alt="user photo" class="img-responsive employee-photo">
                                                 <div class="upload-btn-wrapper">
                                                     <button class="btn btn-default btn-upload">Upload a file</button>
                                                     <input type='file' name="file" id="imgInput" />
