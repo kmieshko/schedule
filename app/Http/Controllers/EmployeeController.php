@@ -28,6 +28,8 @@ class EmployeeController extends Controller
         $this->data['default_image'] = "user.png";
         $this->data['grr_template_front'] = "grr_template_front.png";
         $this->data['grr_template_back'] = "grr_template_back.png";
+        $this->data['baikal_template_front'] = "baikal_template_front.png";
+        $this->data['baikal_template_back'] = "baikal_template_back.png";
     }
 
     public function index()
@@ -125,7 +127,7 @@ class EmployeeController extends Controller
         return response()->json(array(), 204);
     }
 
-    public function ajaxGetCardTemplate()
+    public function ajaxGetGrrCardTemplate()
     {
         $img_front = file_get_contents(base_path() . "/public/images/" . $this->data['grr_template_front']);
         $img_back = file_get_contents(base_path() . "/public/images/" . $this->data['grr_template_back']);
@@ -265,8 +267,29 @@ class EmployeeController extends Controller
             $data['last_name'] = $_POST['last_name'];
             $data['position'] = $_POST['position'];
             $objEmployee->saveChanges($data);
-            return response()->json($_POST, 200);
+            return response()->json($data, 200);
         }
         return response()->json(array(), 404);
+    }
+
+    public function customIdCard()
+    {
+        $data = $this->data;
+        $data['view'] = 'employee.custom_id_card';
+        $data['user_permission'] = '';
+        return view('combined')->with($data);
+    }
+
+    public function ajaxGetCardTemplates()
+    {
+        $grr_img_front = file_get_contents(base_path() . "/public/images/" . $this->data['grr_template_front']);
+        $grr_img_back = file_get_contents(base_path() . "/public/images/" . $this->data['grr_template_back']);
+        $baikal_img_front = file_get_contents(base_path() . "/public/images/" . $this->data['baikal_template_front']);
+        $baikal_img_back = file_get_contents(base_path() . "/public/images/" . $this->data['baikal_template_back']);
+        $data['grr_front_template_base64'] = base64_encode($grr_img_front);
+        $data['grr_back_template_base64'] = base64_encode($grr_img_back);
+        $data['baikal_front_template_base64'] = base64_encode($baikal_img_front);
+        $data['baikal_back_template_base64'] = base64_encode($baikal_img_back);
+        return response()->json($data, 200);
     }
 }

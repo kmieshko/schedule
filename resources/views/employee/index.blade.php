@@ -295,7 +295,7 @@
 
             // GET TEMPLATES FOR ID CARD
             $.ajax({
-                url: '/employee/get-card-template',
+                url: '/employee/get-grr-card-template',
                 method: 'post',
                 success: function (response, textStatus, xhr) {
                     let message = '';
