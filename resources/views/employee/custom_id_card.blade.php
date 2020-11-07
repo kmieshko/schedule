@@ -61,7 +61,7 @@
                         </div>
                         <!-- /.box-header -->
                         <div class="box-body">
-                            <form id="form">
+                            <div id="form">
                                 <div class="row">
                                     <div class="col-md-5">
                                         <div class="form-group">
@@ -97,10 +97,10 @@
                                             <label class="col-form-label col-md-5 pt-0">Template</label>
                                             <div class="col-md-6">
                                                 <label class="radio-inline">
-                                                    <input type="radio" name="template" id="template" value="grr"> GRR
+                                                    <input type="radio" name="template" value="grr"> GRR
                                                 </label>
                                                 <label class="radio-inline">
-                                                    <input type="radio" name="template" id="template" value="baikal" checked> Baikal
+                                                    <input type="radio" name="template" value="baikal" checked> Baikal
                                                 </label>
                                             </div>
                                         </div>
@@ -109,7 +109,7 @@
                                 <div class="text-center">
                                     <button id="generate" class="btn btn-default bg-purple btn-lg">Generate ID</button>
                                 </div>
-                            </form>
+                            </div>
                         </div>
                         <!-- /.box-body -->
                     </div>
@@ -163,13 +163,13 @@
                 success: function (response, textStatus, xhr) {
                     let message = '';
                     if (xhr.status === 200) {
-                        message = 'Template received!';
+                        message = 'Templates received!';
                         grr_front_template.src = 'data:image/png;base64,' + response.grr_front_template_base64;
                         grr_back_template.src = 'data:image/png;base64,' + response.grr_back_template_base64;
                         baikal_front_template.src = 'data:image/png;base64,' + response.baikal_front_template_base64;
                         baikal_back_template.src = 'data:image/png;base64,' + response.baikal_back_template_base64;
                     } else {
-                        message = 'Error receiving template! Try again later';
+                        message = 'Error receiving templates! Try again later';
                     }
                     console.log(message);
                 },
@@ -190,9 +190,22 @@
 
         $("#imgInput").change(function() {
             readURL(this);
+            let image_employee = $('#imgPreview')[0];
+            let employeeImgPath = image_employee.src;
+            obj['image_employee'] = image_employee;
+            obj['employeeImgPath'] = employeeImgPath;
         });
 
         /**********ID-CARD START***************/
+
+        let obj = {
+            employeeName: '',
+            employeePosition: '',
+            image_employee: '',
+            id_card: '',
+            employeeImgPath: '',
+            template: ''
+        };
 
         function convertCanvasToImage(canvas) {
             let new_image = new Image();
@@ -208,7 +221,7 @@
                 small: 155,
                 medium: 186,
                 large: 248,
-                xlage: 375,
+                xlage: 350,
                 xxlage: 450,
             };
             let data = "ID " + obj.id_card +
@@ -226,15 +239,23 @@
                     "536 Columbia Street, Brooklyn, 11231%0A%0A" +
                     "718-499-7200%0A";
             }
-            return "http://chart.apis.google.com/chart?cht=qr&chl=" + data + "&chs=" + size.xlage;
+            let qr = "http://chart.apis.google.com/chart?cht=qr&chl=" + data + "&chs=" + size.xlage;
+            if (obj.template === 'baikal') {
+                qr += '&chco=283371';
+            }
+            return qr;
         }
 
-        function createAndSaveIdCard(front_canvas, back_canvas, front_context, back_context, obj)
+        function createIdCard(front_canvas, back_canvas, front_context, back_context, obj)
         {
             let emplPhotoSize = 256;
 
             // Draw Front Template
-            front_context.drawImage(front_template, 0, 0);
+            if (obj.template === 'grr') {
+                front_context.drawImage(grr_front_template, 0, 0);
+            } else {
+                front_context.drawImage(baikal_front_template, 0, 0);
+            }
 
             // Draw employee photo
             front_context.drawImage(obj.image_employee, 100, 250, emplPhotoSize, emplPhotoSize);
@@ -248,159 +269,63 @@
             let lineHeight = 60;
             let lines = text.split('\n');
             front_context.font = "40px sans-serif";
+            if (obj.template === 'baikal') {
+                front_context.fillStyle = "#ffffff";
+            }
             for (let i = 0; i < lines.length; i++) {
                 front_context.fillText(lines[i], x, y + (i * lineHeight));
             }
 
             // Draw Back Template
-            back_context.drawImage(back_template, 0, 0);
+            if (obj.template === 'grr') {
+                back_context.drawImage(grr_back_template, 0, 0);
+            } else {
+                back_context.drawImage(baikal_back_template, 0, 0);
+            }
 
             // Draw QR Code on Back Canvas
             let qr = new Image();
             qr.setAttribute('crossOrigin', 'anonymous');
             qr.onload = function() {
-                back_context.drawImage(qr, 530, 110);
-
+                if (obj.template === 'grr') {
+                    back_context.drawImage(qr, 530, 110);
+                } else {
+                    back_context.drawImage(qr, 530, 215);
+                }
                 let res_img_front = convertCanvasToImage(front_canvas);
                 let res_img_back = convertCanvasToImage(back_canvas);
-
-                let send = {
-                    image_front: res_img_front.src,
-                    image_back: res_img_back.src,
-                    id_card: obj.id_card,
-                    id_employee: obj.id_employee
-                };
-
-                // Save Id Card
-                $.ajax({
-                    url: '/employee/save-id-card',
-                    method: 'post',
-                    contentType: 'application/x-www-form-urlencoded',
-                    data: send,
-                    success: function (response, textStatus, xhr) {
-                        let message = '';
-                        if (xhr.status === 200) {
-                            message = 'Success';
-                            $('#idCardModal').modal('show');
-                        } else {
-                            message = 'Error!';
-                        }
-                        console.log(message);
-                    },
-                    error: function (xhr, ajaxOptions, thrownError) {
-                        alert(thrownError);
-                    },
-                });
+                $('#idCardModal').modal('show');
             };
             qr.src = generateQrCode(obj);
         }
 
-        $('.id-card').on('click', function(e){
-            e.preventDefault();
-            let target = $(e.target);
-            let id_employee = target.data().id_employee;
-            let data = target.parents('.employee');
-            let employeeName = data.children('.employee-name').text();
-            let employeePosition = data.children('.employee-position').text();
-            let image_employee = data.find('.employee-image')[0];
-            let employeeImgPath = data.find('.employee-image').attr('src');
+        $('#generate').on('click', function(e){
+            let employeeName = $('#firstName').val() + ' ' + $('#lastName').val();
+            let employeePosition = $('#position').val();
+            let template = $('input[name=template]:checked').val();
             let d = new Date();
             let id_card = (d.getTime() + d.getTimezoneOffset() * 60 * 1000);
-            let obj = {
-                employeeName: employeeName,
-                employeePosition: employeePosition,
-                image_employee: image_employee,
-                id_card: id_card,
-                id_employee: id_employee,
-                employeeImgPath: employeeImgPath
-            };
+            obj['employeeName'] = employeeName;
+            obj['employeePosition'] = employeePosition;
+            obj['id_card'] = id_card;
+            obj['template'] = template;
 
-            $.ajax({
-                url: '/employee/get-id-card',
-                method: 'POST',
-                contentType: 'application/x-www-form-urlencoded',
-                data: {id: obj.id_employee},
-                beforeSend: function() {
-                    $('button.change-employee').attr('disabled', true);
-                    $('button.delete-employee').attr('disabled', true);
+            // clear canvas
+            let front_canvas =  $('#canvas-upload-front')[0];
+            let back_canvas =  $('#canvas-upload-back')[0];
+            let front_context = front_canvas.getContext('2d');
+            let back_context = back_canvas.getContext('2d');
+            front_context.clearRect(0, 0, front_canvas.width, front_canvas.height);
+            back_context.clearRect(0, 0, back_canvas.width, back_canvas.height);
 
-                    // clear canvas
-                    let front_canvas =  $('#canvas-upload-front')[0];
-                    let back_canvas =  $('#canvas-upload-back')[0];
-                    let front_context = front_canvas.getContext('2d');
-                    let back_context = back_canvas.getContext('2d');
-                    front_context.clearRect(0, 0, front_canvas.width, front_canvas.height);
-                    back_context.clearRect(0, 0, back_canvas.width, back_canvas.height);
-                },
-                success: function (response, textStatus, xhr) {
-                    let front_canvas =  $('#canvas-upload-front')[0];
-                    let back_canvas =  $('#canvas-upload-back')[0];
-                    let front_context = front_canvas.getContext('2d');
-                    let back_context = back_canvas.getContext('2d');
-                    front_context.clearRect(0, 0, front_canvas.width, front_canvas.height);
-                    back_context.clearRect(0, 0, back_canvas.width, back_canvas.height);
-                    if (xhr.status === 200) {
-                        let front = new Image();
-                        let back = new Image();
-                        front.src = response.front_id_card;
-                        back.src = response.back_id_card;
-                        front.onload = function(){ front_context.drawImage(front, 0, 0); };
-                        back.onload = function(){ back_context.drawImage(back, 0, 0); };
-                        $('#idCardModal').modal('show');
-                        console.log(front);
-                    } else if (xhr.status === 204) {
-                        console.log('ID-card Not found. Creating new ID-card');
-                        createAndSaveIdCard(front_canvas, back_canvas, front_context, back_context, obj);
-                    } else {
-                        alert('Error creating ID-card! Reload page and try again!');
-                    }
-                },
-                error: function (xhr, ajaxOptions, thrownError) {
-                    alert(thrownError+1);
-                },
-                complete: function () {
-                    $('button.change-employee').attr('disabled', false);
-                    $('button.delete-employee').attr('disabled', false);
-                }
-            });
+            console.log(obj);
+
+            if (obj.employeeName && obj.employeePosition && obj.employeeImgPath) {
+                createIdCard(front_canvas, back_canvas, front_context, back_context, obj);
+            }
         });
 
         /**********ID-CARD END***************/
-
-
-
-        // $('#generate').on('click', function(e) {
-        //     //e.preventDefault();
-        //     let formData = new FormData($('form')[0]);
-        //     console.log(formData);
-        //     $.ajax({
-        //         url: '/employee/create-custom-id-card',
-        //         method: 'POST',
-        //         data: formData,
-        //         cache: false,
-        //         contentType: false,
-        //         processData: false,
-        //         beforeSend: function () {
-        //             $('button').attr('disabled', true);
-        //         },
-        //         success: function (response, textStatus, xhr) {
-        //             let message = '';
-        //             if (xhr.status === 200) {
-        //                 message = 'Employee was successfully created!';
-        //             } else {
-        //                 message = 'Error! Try again later';
-        //             }
-        //             alert(message);
-        //             console.log(message);
-        //         },
-        //         error: function (xhr, ajaxOptions, thrownError) {
-        //             alert(thrownError);
-        //         },
-        //         complete: function () {
-        //             $('button').attr('disabled', false);
-        //         }
-        //     });
-        // });
 
 	</script>
 @endsection

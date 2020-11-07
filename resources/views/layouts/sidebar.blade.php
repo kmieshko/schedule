@@ -36,7 +36,7 @@
               <ul class="treeview-menu">
                   <li id="viewEmployeeNav"><a href="<?= url('employee/')?>"><i class="fa fa-circle-o"></i>View Employees</a></li>
                   <li id="createEmployeeNav"><a href="<?= url('employee/create')?>"><i class="fa fa-circle-o"></i>Create Employee</a></li>
-                  <li id="createCustomIdCard"><a href="<?= url('employee/create-custom-id-card')?>"><i class="fa fa-circle-o"></i>Create Custom ID Card</a></li>
+                  <li id="createCustomIdCard"><a href="<?= url('employee/custom-id-card')?>"><i class="fa fa-circle-o"></i>Create Custom ID Card</a></li>
               </ul>
           </li>
 
