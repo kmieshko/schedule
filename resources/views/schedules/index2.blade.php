@@ -94,7 +94,6 @@
             z-index: -1;
             display: flex !important;
             justify-content: center;
-            align-items: center;
         }
 
         .modal-open .modal {
