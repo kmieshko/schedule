@@ -171,7 +171,7 @@
                                             >
                                                 ID CARD
                                                 @if(!$employee->id_card)
-                                                <span class="tooltip-id-card-text">Photo needed</span>
+                                                    <span class="tooltip-id-card-text">Photo needed</span>
                                                 @endif
 
                                             </button>

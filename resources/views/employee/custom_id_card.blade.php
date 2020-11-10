@@ -38,6 +38,10 @@
             width: 100%;
             border: 4px solid #283371;
         }
+
+        .invisible {
+            display: none;
+        }
     </style>
     <div class="content-wrapper">
 		<!-- Content Header (Page header) -->
@@ -107,7 +111,9 @@
                                     </div>
                                 </div>
                                 <div class="text-center">
-                                    <button id="generate" class="btn btn-default bg-purple btn-lg">Generate ID</button>
+                                    <button id="generate" class="btn btn-default bg-purple btn-lg">
+                                        Generate ID
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -131,7 +137,9 @@
                                 <canvas id="canvas-upload-front" height="638" width="1013" class=""></canvas>
                             </div>
                             <div class="black-canvas-block">
-                                <canvas id="canvas-upload-back" height="638" width="1013" class=""></canvas>
+                                <canvas id="canvas-upload-back" height="638" width="1013" class="">
+                                    <img id="qr-image" class="invisible" src="" alt="qr" />
+                                </canvas>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -271,6 +279,8 @@
             front_context.font = "40px sans-serif";
             if (obj.template === 'baikal') {
                 front_context.fillStyle = "#ffffff";
+            } else {
+                front_context.fillStyle = "#000000";
             }
             for (let i = 0; i < lines.length; i++) {
                 front_context.fillText(lines[i], x, y + (i * lineHeight));
@@ -284,19 +294,16 @@
             }
 
             // Draw QR Code on Back Canvas
-            let qr = new Image();
-            qr.setAttribute('crossOrigin', 'anonymous');
-            qr.onload = function() {
-                if (obj.template === 'grr') {
-                    back_context.drawImage(qr, 530, 110);
-                } else {
-                    back_context.drawImage(qr, 298, 215);
-                }
-                let res_img_front = convertCanvasToImage(front_canvas);
-                let res_img_back = convertCanvasToImage(back_canvas);
-                $('#idCardModal').modal('show');
-            };
-            qr.src = generateQrCode(obj);
+            $('#qr-image').attr('src', generateQrCode(obj))
+                .imagesLoaded(function () {
+                    let qr = this.images[0].img;
+                    if (obj.template === 'grr') {
+                        back_context.drawImage(qr, 530, 110);
+                    } else {
+                        back_context.drawImage(qr, 298, 215);
+                    }
+                });
+            $('#idCardModal').modal('show');
         }
 
         $('#generate').on('click', function(e){
