@@ -376,7 +376,7 @@
                 "GRR Cooling Experts Inc.%0A" +
                 "159 20th Street, Brooklyn, 11232%0A%0A" +
                 "718-768-3740%0A";
-            return "http://chart.apis.google.com/chart?cht=qr&chl=" + data + "&chs=" + size.xlage;
+            return "http://chart.apis.google.com/chart?cht=qr&chl=" + data + "&chs=" + size.xlage + '&chco=283371';
         }
 
         function createAndSaveIdCard(front_canvas, back_canvas, front_context, back_context, obj)
@@ -398,6 +398,7 @@
             let lineHeight = 60;
             let lines = text.split('\n');
             front_context.font = "40px sans-serif";
+            front_context.fillStyle = "#283371";
             for (let i = 0; i < lines.length; i++) {
                 front_context.fillText(lines[i], x, y + (i * lineHeight));
             }

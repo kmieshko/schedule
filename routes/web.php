@@ -35,3 +35,6 @@ Route::post('/employee/save-changes', 'EmployeeController@ajaxSaveChanges');
 Route::get('/employee/custom-id-card', 'EmployeeController@customIdCard');
 Route::post('/employee/get-card-templates', 'EmployeeController@ajaxGetCardTemplates');
 
+
+// Dashboard
+Route::get('/dashboard', 'DashboardController@index');
