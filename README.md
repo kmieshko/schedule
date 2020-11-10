@@ -11,16 +11,21 @@ It's a first steps in developing CRM system for a company that has been operated
 ## Features
 
 **Scheduling**
- * Scheduling for all employees based on their occupation, role and number department. The algorithm works automatically and doesn't need to involve the supervisor (complete)
- * Download via Excel (in process)
- * Editing by supervisor (in process)
+ * Scheduling for all employees based on their occupation, role and number department. The algorithm works automatically and doesn't need to involve the supervisor
+ * Edit schedule
+ * Download via Excel
+ 
+ **Employee**
+ * Create employee
+ * Edit employee
+ * Generate employee ID Card*
+ * Generate custom ID Card without saving to DB
 
 ## Future features
 
-1. Employees (Create / update / delete employees)
-2. Products (Create / update / delete products on stock)
-3. Scanning the barcodes and ctock control
+1. Products (Create / update / delete products on stock)
+2. Scanning the barcodes and ctock control
 
-## A few screenshots
+## Example
 
 
