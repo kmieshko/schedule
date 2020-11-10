@@ -248,9 +248,10 @@
                     "718-499-7200%0A";
             }
             let qr = "http://chart.apis.google.com/chart?cht=qr&chl=" + data + "&chs=" + size.xlage;
-            if (obj.template === 'baikal') {
-                qr += '&chco=283371';
-            }
+
+            // color of qr code
+            qr += '&chco=283371';
+
             return qr;
         }
 
@@ -280,7 +281,7 @@
             if (obj.template === 'baikal') {
                 front_context.fillStyle = "#ffffff";
             } else {
-                front_context.fillStyle = "#000000";
+                front_context.fillStyle = "#283371";
             }
             for (let i = 0; i < lines.length; i++) {
                 front_context.fillText(lines[i], x, y + (i * lineHeight));
