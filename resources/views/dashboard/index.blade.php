@@ -46,11 +46,14 @@
                     let labels = [];
                     let data = [];
                     let colors = {
-                        green: '#81b214',
-                        red: '#f95959',
-                        orange: '#ff9a3c',
-                        yellow: '#ffc93c',
-                        blue: '#5dd7cc'
+                        purple: '#9F46E4', // on hold
+                        pink: '#A7226E', // need to file
+                        red: '#f93e3f', // in progress
+                        orange: '#FC913A', // open
+                        yellow: '#F9D423', // closed
+                        green: '#ACE60F', // invoiced
+                        blue: '#48DAFD', // scheduled
+                        grey: '#94b0b7' // avoid
                     };
                     $.each(response.tasks_info, function (key, value) {
                         labels.push(key);
@@ -62,14 +65,14 @@
                             datasets: [{
                                 data: data,
                                 backgroundColor: [
-                                    colors.green,
+                                    colors.orange,
+                                    colors.pink,
                                     colors.yellow,
                                     colors.red,
-                                    colors.orange,
+                                    colors.purple,
+                                    colors.grey,
                                     colors.blue,
-                                    colors.blue,
-                                    colors.blue,
-                                    colors.blue,
+                                    colors.green,
                                 ],
                             }],
                             labels: labels
