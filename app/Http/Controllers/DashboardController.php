@@ -18,6 +18,8 @@ class DashboardController extends Controller
 
     public $data = array();
     public $request = null;
+    private $client;
+    private $allJobs = 1190695568232322;
 
     public function __construct()
     {
@@ -27,6 +29,7 @@ class DashboardController extends Controller
 
         $this->request = new Request();
         $this->data['page_title'] = 'Dashboard';
+        $this->client = Asana\Client::accessToken('1/1176229093318817:feda44c6f1d61980aeb42b015350293c');
     }
 
     public function index()
@@ -34,14 +37,37 @@ class DashboardController extends Controller
         $data = $this->data;
         $data['view'] = 'dashboard.index';
         $data['user_permission'] = '';
-
-        $client = Asana\Client::accessToken('1/1176229093318817:feda44c6f1d61980aeb42b015350293c');
         $projectId = 1190695568232322;
-        $tasks = $client->tasks->getTasksForProject($projectId, array('opt_fields' => 'custom_fields.enum_value.Job Status'), array('opt_pretty' => 'true'));
-        foreach ($tasks as $task) {
-            $data['tasks'][] = $task;
-        }
-        dd($data['tasks']);
         return view('combined')->with($data);
+    }
+
+    public function ajaxGetDashboardInfo()
+    {
+        $tasks = $this->client->tasks->getTasksForProject($this->allJobs, array('opt_fields' => 'custom_fields,completed'), array('opt_pretty' => 'true'));
+        $data['tasks'] = array();
+        $data['tasks_info'] = array();
+        foreach ($tasks as $task) {
+            foreach ($task as $custom_field) {
+                if (is_array($custom_field)) {
+                    foreach ($custom_field as $array) {
+                        if ($array->name == 'Job Status') {
+                            $data['tasks'][$task->gid]['id'] = $task->gid;
+                            $data['tasks'][$task->gid]['completed'] = $task->completed;
+                            $data['tasks'][$task->gid]['job_status'] = $array->enum_value->name;
+                            $data['tasks_info']["{$array->enum_value->name}"] = 0;
+                        }
+                    }
+                }
+            }
+        }
+        $data['tasks_info']['INVOICED'] = 0;
+        foreach ($data['tasks'] as $task) {
+            if ($task['completed']) {
+                $data['tasks_info']['INVOICED'] += 1;
+            } else {
+                $data['tasks_info']["{$task['job_status']}"] += 1;
+            }
+        }
+        return response()->json($data, 200);
     }
 }

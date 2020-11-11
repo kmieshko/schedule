@@ -38,3 +38,4 @@ Route::post('/employee/get-card-templates', 'EmployeeController@ajaxGetCardTempl
 
 // Dashboard
 Route::get('/dashboard', 'DashboardController@index');
+Route::get('/dashboard/get-dashboard-info', 'DashboardController@ajaxGetDashboardInfo');
