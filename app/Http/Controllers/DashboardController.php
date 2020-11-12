@@ -20,6 +20,7 @@ class DashboardController extends Controller
     public $request = null;
     private $client;
     private $allJobs = 1190695568232322;
+    private $accessToken = '1/1176229093318817:feda44c6f1d61980aeb42b015350293c';
 
     public function __construct()
     {
@@ -29,7 +30,7 @@ class DashboardController extends Controller
 
         $this->request = new Request();
         $this->data['page_title'] = 'Dashboard';
-        $this->client = Asana\Client::accessToken('1/1176229093318817:feda44c6f1d61980aeb42b015350293c');
+        $this->client = Asana\Client::accessToken($this->accessToken);
     }
 
     public function index()
@@ -37,7 +38,6 @@ class DashboardController extends Controller
         $data = $this->data;
         $data['view'] = 'dashboard.index';
         $data['user_permission'] = '';
-        $projectId = 1190695568232322;
         return view('combined')->with($data);
     }
 
