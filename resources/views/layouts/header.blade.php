@@ -4,6 +4,8 @@
 	<meta charset="utf-8">
 	<meta name="csrf-token" content="{{csrf_token()}}"/>
 	<title><?php echo $page_title ?? 'CRM'; ?></title>
+    <!-- Favicon -->
+    <link rel="icon" href="/public/images/favicon.png" type="image/x-icon" />
 	<!-- Tell the browser to be responsive to screen width -->
 	<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
 	<!-- Pretty-checkbox -->
