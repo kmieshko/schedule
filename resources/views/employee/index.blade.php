@@ -121,7 +121,8 @@
                 <div class="col-md-12">
                     <div class="box box-purple p-5">
                         <div class="box-header">
-                            <h3 class="box-title">Employees</h3>
+{{--                            <h3 class="box-title">Employees</h3>--}}
+                            <h4 class="box-title">All people images were taken from <a href="https://generated.photos/">generated.photos</a> and used just in the study goals </h4>
                         </div>
                         <!-- /.box-header -->
                         <div class="box-body">
@@ -170,7 +171,7 @@
                                                     data-target="#idCardModal"
                                             >
                                                 ID CARD
-                                                @if(!$employee->id_card)
+                                                @if(!$employee->image)
                                                     <span class="tooltip-id-card-text">Photo needed</span>
                                                 @endif
 
@@ -432,7 +433,6 @@
                         let message = '';
                         if (xhr.status === 200) {
                             message = 'Success';
-                            $('#idCardModal').modal('show');
                         } else {
                             message = 'Error!';
                         }
@@ -568,6 +568,10 @@
                 cache: false,
                 contentType: false,
                 processData: false,
+                beforeSend: function() {
+                    $('button').attr('disabled', true);
+                    $('#save-changes').button('loading');
+                },
                 success: function (response, textStatus, xhr) {
                     if (xhr.status === 200) {
                         alert('Success!');
@@ -578,6 +582,10 @@
                 },
                 error: function (xhr, ajaxOptions, thrownError) {
                     alert(thrownError);
+                },
+                complete: function () {
+                    $('button').attr('disabled', false);
+                    $('#save-changes').button('reset');
                 }
             });
         });

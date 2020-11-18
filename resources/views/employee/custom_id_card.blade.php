@@ -101,10 +101,10 @@
                                             <label class="col-form-label col-md-5 pt-0">Template</label>
                                             <div class="col-md-6">
                                                 <label class="radio-inline">
-                                                    <input type="radio" name="template" value="grr"> GRR
+                                                    <input type="radio" name="template" value="grr"> Template1
                                                 </label>
                                                 <label class="radio-inline">
-                                                    <input type="radio" name="template" value="baikal" checked> Baikal
+                                                    <input type="radio" name="template" value="baikal" checked> Template2
                                                 </label>
                                             </div>
                                         </div>

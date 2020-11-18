@@ -45,16 +45,20 @@
                 success: function (response) {
                     let labels = [];
                     let data = [];
-                    let colors = {
-                        purple: '#9F46E4', // on hold
-                        pink: '#A7226E', // need to file
-                        red: '#f93e3f', // in progress
-                        orange: '#FC913A', // open
-                        yellow: '#F9D423', // closed
-                        green: '#ACE60F', // invoiced
-                        blue: '#48DAFD', // scheduled
-                        grey: '#94b0b7' // avoid
-                    };
+                    let palette = [
+                        '#900C3F',
+                        '#C70039',
+                        '#FF5733',
+                        '#FF8D1A',
+                        '#FFC300',
+                        '#EDDD53',
+                        '#ADD45C',
+                        '#57C785',
+                        '#00BAAD',
+                        '#2A7B9B',
+                        '#3D3D6B',
+                        '#511849',
+                    ];
                     $.each(response.tasks_info, function (key, value) {
                         labels.push(key);
                         data.push(value);
@@ -64,16 +68,7 @@
                         data: {
                             datasets: [{
                                 data: data,
-                                backgroundColor: [
-                                    colors.orange,
-                                    colors.pink,
-                                    colors.yellow,
-                                    colors.red,
-                                    colors.purple,
-                                    colors.grey,
-                                    colors.blue,
-                                    colors.green,
-                                ],
+                                backgroundColor: palette
                             }],
                             labels: labels
                         },
